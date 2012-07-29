@@ -1,6 +1,26 @@
 <html>
 <head>
 <style type="text/css">
+body {
+  background: black;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+#chat {
+  position: absolute;
+  top: 0px;
+  margin: auto;
+}
+#chat * {
+  margin: 0px;
+  padding: 0px;
+  line-height: 1.2em;
+}
+#controls {
+  position: absolute;
+  bottom: 0px;
+  margin: auto;
+}
 #msg {
   display: none;
 }
@@ -22,13 +42,15 @@
     $('#chat').append('<p>You are disconnected.</p>');
     $('#username').css('display', 'inline');
     $('#connect').css('display', 'inline');
+    $('#connect').attr('disabled', '');
     $('#msg').css('display', 'none');
   });
   socket.on('msg', function(data) {
-    $('#chat').append('<p>' + data['msg'] + '</p>');
+    $('#chat').append('<p>' + data['source'] + ':'  + data['msg'] + '</p>');
   });
 
   function login() {
+    $('#connect').attr('disabled', 'disabled');
     socket.emit('login', {username: $('#username').val()});
   }
 
@@ -44,11 +66,12 @@
 </script>
 </head>
 <body>
-<h1>chat</h1>
 <div id="chat"></div>
+<div id="controls">
 <input type="text" id="username" value="John Doe" />
 <button id="connect" onclick="login()">Connect</button>
 <input type="text" id="msg" placeholder="Enter your message here" />
+</control>
 </body>
 </html>
 
