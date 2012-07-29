@@ -47,8 +47,8 @@ var chat = io.of('/chat').on('connection', function (socket) {
         }
       }
       console.log('User ' + username + ' left');
+      socket.broadcast.emit('logout', 'User ' + username + ' left');
     });
-    socket.broadcast.emit('logout', 'User left');
   });
 
   socket.on('msg', function(data) {
