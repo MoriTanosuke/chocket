@@ -18,6 +18,9 @@ function handler (req, res) {
   });
 }
 
+function escapeHTML(string) {
+    return string.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 var users = new Array();
 
 var chat = io.of('/chat').on('connection', function (socket) {
@@ -43,9 +46,9 @@ var chat = io.of('/chat').on('connection', function (socket) {
 
   socket.on('msg', function(data) {
     socket.get('username', function(err, username) {
-      socket.broadcast.emit('msg', {msg: username + ': ' + data['msg'].escapeHTML()});
+      socket.broadcast.emit('msg', {msg: username + ': ' + escapeHTML(data['msg'])});
     });
-    socket.emit('msg', {msg: 'You said: ' + data['msg'].escapeHTML()});
+    socket.emit('msg', {msg: 'You said: ' + escapeHTML(data['msg'])});
   });
 });
 
