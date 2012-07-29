@@ -2,7 +2,8 @@ var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
   , fs = require('fs')
 
-app.listen(8888);
+// we're using herokus PORT or 8888 locally
+app.listen(process.env.PORT || 8888);
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
