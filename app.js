@@ -43,9 +43,9 @@ var chat = io.of('/chat').on('connection', function (socket) {
 
   socket.on('msg', function(data) {
     socket.get('username', function(err, username) {
-      socket.broadcast.emit('msg', {msg: username + ': ' + data['msg']});
+      socket.broadcast.emit('msg', {msg: username + ': ' + data['msg'].escapeHTML()});
     });
-    socket.emit('msg', {msg: 'You said: ' + data['msg']});
+    socket.emit('msg', {msg: 'You said: ' + data['msg'].escapeHTML()});
   });
 });
 
