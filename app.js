@@ -35,6 +35,7 @@ function replaceURLWithHTMLLinks(text) {
 }
 
 var users = new Array();
+var room = 'Lobby';
 
 var chat = io.of('/chat').on('connection', function (socket) {
   socket.on('login', function (data) {
@@ -43,7 +44,7 @@ var chat = io.of('/chat').on('connection', function (socket) {
       socket.broadcast.emit('msg', {source: data['username'], msg: 'User joined'});
       users.push(data['username']);
     });
-    socket.emit('ready', {users: users})
+    socket.emit('ready', {room: room, username: data['username'], users: users})
   });
   socket.on('disconnect', function() {
     socket.get('username', function(err, username) {

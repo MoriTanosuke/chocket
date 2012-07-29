@@ -1,10 +1,14 @@
 <html>
 <head>
+<title>Chat</title>
 <style type="text/css">
 body {
   background: black;
   color: white;
   font-family: Arial, sans-serif;
+}
+a {
+  color: #a00;
 }
 #chat {
   position: absolute;
@@ -19,7 +23,11 @@ body {
 #controls {
   position: absolute;
   bottom: 0px;
+  left: 0px;
+  right: 0px;
   margin: auto;
+  padding-left: 5px;
+  padding-right: 5px
 }
 #msg {
   display: none;
@@ -29,6 +37,8 @@ body {
 <script src="http://code.jquery.com/jquery.min.js"></script>
 <script>
   var socket = io.connect('/chat');
+  var unread = 0;
+  var username = 'John Doe';
 
   socket.on('ready', function (data) {
     $('#chat').append('<p>You are logged in.</p>');
@@ -46,12 +56,17 @@ body {
     $('#msg').css('display', 'none');
   });
   socket.on('msg', function(data) {
-    $('#chat').append('<p>' + data['source'] + ':'  + data['msg'] + '</p>');
+    if(document.hasFocus()) {
+      unread = 0;
+    }
+    document.title = '(' + (unread++) + ')';
+    $('#chat').append('<p>' + data['source'] + ': '  + data['msg'] + '</p>');
   });
 
   function login() {
+    username = $('#username').val();
     $('#connect').attr('disabled', 'disabled');
-    socket.emit('login', {username: $('#username').val()});
+    socket.emit('login', {username: username});
   }
 
   // bind jquery event handlers
