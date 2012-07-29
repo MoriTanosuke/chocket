@@ -34,17 +34,31 @@ function replaceURLWithHTMLLinks(text) {
     return text.replace(exp,"<a href='$1'>$1</a>"); 
 }
 
+function isDuplicate(username) {
+  for(i in users) {
+    if(users[i] == username) {
+      return true;
+    }
+  }
+  return false;
+}
+
 var users = new Array();
 var room = 'Lobby';
 
 var chat = io.of('/chat').on('connection', function (socket) {
   socket.on('login', function (data) {
-    console.log('User ' + data['username'] + ' joined');
-    socket.set('username', data['username'], function() {
-      socket.broadcast.emit('msg', {source: data['username'], msg: 'User joined'});
-      users.push(data['username']);
-    });
-    socket.emit('ready', {room: room, username: data['username'], users: users})
+    if(isDuplicate(data['username'])) {
+      console.log('Username ' + data['username'] + ' already in use');
+      socket.emit('faillogin', {users: users, reason: 'Username already taken'});
+    } else {
+      console.log('User ' + data['username'] + ' joined');
+      socket.set('username', data['username'], function() {
+        socket.broadcast.emit('msg', {source: data['username'], msg: 'User joined'});
+        users.push(data['username']);
+      });
+      socket.emit('ready', {room: room, username: data['username'], users: users});
+    }
   });
   socket.on('disconnect', function() {
     socket.get('username', function(err, username) {

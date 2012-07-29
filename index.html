@@ -10,6 +10,9 @@ body {
 a {
   color: #a00;
 }
+.error {
+  color: red;
+}
 #chat {
   position: absolute;
   top: 0px;
@@ -48,11 +51,18 @@ a {
     $('#connect').css('display', 'none');
     $('#msg').css('display', 'inline');
   });
+  socket.on('faillogin', function(data) {
+    $('#chat').append('<p class="error">' + data['reason'] + '</p>');
+    $('#username').css('display', 'inline');
+    $('#connect').css('display', 'inline');
+    $('#connect').removeAttr('disabled');
+    $('#msg').css('display', 'none');
+  });
   socket.on('disconnect', function() {
     $('#chat').append('<p>You are disconnected.</p>');
     $('#username').css('display', 'inline');
     $('#connect').css('display', 'inline');
-    $('#connect').attr('disabled', '');
+    $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
   socket.on('msg', function(data) {
