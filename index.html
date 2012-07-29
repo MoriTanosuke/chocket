@@ -1,0 +1,54 @@
+<html>
+<head>
+<style type="text/css">
+#msg {
+  display: none;
+}
+</style>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery.min.js"></script>
+<script>
+  var socket = io.connect('/chat');
+
+  socket.on('ready', function (data) {
+    $('#chat').append('<p>You are logged in.</p>');
+    $('#chat').append('<p>Users: ' + data['users'].join(',') + '</p>');
+    // hide username + connect, show disconnect
+    $('#username').css('display', 'none');
+    $('#connect').css('display', 'none');
+    $('#msg').css('display', 'inline');
+  });
+  socket.on('disconnect', function() {
+    $('#chat').append('<p>You are disconnected.</p>');
+    $('#username').css('display', 'inline');
+    $('#connect').css('display', 'inline');
+    $('#msg').css('display', 'none');
+  });
+  socket.on('msg', function(data) {
+    $('#chat').append('<p>' + data['msg'] + '</p>');
+  });
+
+  function login() {
+    socket.emit('login', {username: $('#username').val()});
+  }
+
+  // bind jquery event handlers
+  $(document).ready(function() {
+  $('#msg').keyup(function(event) {
+    if(event.keyCode == 13) {
+      socket.emit('msg', {msg: event.target.value});
+      event.target.value = '';
+    }
+  });
+  });
+</script>
+</head>
+<body>
+<h1>chat</h1>
+<div id="chat"></div>
+<input type="text" id="username" value="John Doe" />
+<button id="connect" onclick="login()">Connect</button>
+<input type="text" id="msg" placeholder="Enter your message here" />
+</body>
+</html>
+
