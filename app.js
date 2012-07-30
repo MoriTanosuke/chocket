@@ -74,8 +74,9 @@ var chat = io.of('/chat').on('connection', function (socket) {
 
   socket.on('msg', function(data) {
     socket.get('username', function(err, username) {
-      socket.broadcast.emit('msg', {source: username, msg: escapeHTML(data['msg'])});
-      socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg'])});
+      var time = new Date();
+      socket.broadcast.emit('msg', {source: username, msg: escapeHTML(data['msg']), timestamp: time});
+      socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg']), timestamp: time});
     });
   });
 });
