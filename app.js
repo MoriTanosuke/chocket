@@ -52,12 +52,13 @@ var chat = io.of('/chat').on('connection', function (socket) {
       console.log('Username ' + data['username'] + ' already in use');
       socket.emit('faillogin', {users: users, reason: 'Username already taken'});
     } else {
+      var time = new Date();
       console.log('User ' + data['username'] + ' joined');
       socket.set('username', data['username'], function() {
         socket.broadcast.emit('msg', {source: data['username'], msg: 'User joined'});
         users.push(data['username']);
       });
-      socket.emit('ready', {room: room, username: data['username'], users: users});
+      socket.emit('ready', {timestamp: time, room: room, username: data['username'], users: users});
     }
   });
   socket.on('disconnect', function() {
@@ -67,8 +68,9 @@ var chat = io.of('/chat').on('connection', function (socket) {
           users.splice(i, 1);
         }
       }
+      var time = new Date();
       console.log('User ' + username + ' left');
-      socket.broadcast.emit('msg', {source: username, msg: 'User left'});
+      socket.broadcast.emit('msg', {timestamp: time, source: username, msg: 'User left'});
     });
   });
 
