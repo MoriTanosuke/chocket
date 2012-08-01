@@ -88,7 +88,7 @@ a {
       unread = 0;
     }
     document.title = '(' + (unread++) + ')';
-    $('#chat').append('<p><span class="username">' + data['source'] + '</span>: <span class="message">'  + data['msg'] + '</span></p>');
+    $('#chat').append('<p><span class="timestamp">' + data['timestamp'] +'</span><span class="username">' + data['source'] + '</span>: <span class="message">'  + data['msg'] + '</span></p>');
   });
 
   function login() {
