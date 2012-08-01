@@ -6,7 +6,7 @@
 body {
   background: black;
   color: white;
-  font-family: Capriola, Arial, sans-serif;
+  font-family: DejaVu Sans Mono, fixed;
 }
 a {
   color: #a00;
@@ -18,11 +18,13 @@ a {
   position: absolute;
   top: 0px;
   margin: auto;
+  color: rgb(85, 85, 85);
+  font-size: 1.2em;
+  line-height: 1.2em;
 }
 #chat * {
   margin: 0px;
   padding: 0px;
-  line-height: 1.2em;
 }
 #controls {
   position: absolute;
@@ -38,6 +40,14 @@ a {
   left: 0;
   right: 0;
   width: 100%;
+  border: none;
+  line-height: 1.2em;
+  padding: 5px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: inherit;
+  border-top: 5px solid rgb(119, 51, 51);
 }
 </style>
 <script src="/socket.io/socket.io.js"></script>
