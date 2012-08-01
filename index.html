@@ -26,6 +26,19 @@ a {
   margin: 0px;
   padding: 0px;
 }
+.messagetext {
+  color: white;
+}
+.timestamp {
+  color: yellow;
+}
+.username {
+  color: green;
+}
+.you {
+  color: gray;
+}
+
 #controls {
   position: absolute;
   bottom: 0px;
@@ -85,13 +98,21 @@ a {
       unread = 0;
     }
     document.title = '(' + (unread++) + ')';
-    $('#chat').append('<p>' + data['source'] + ': '  + data['msg'] + '</p>');
+    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
   });
 
   function login() {
     username = $('#username').val();
     $('#connect').attr('disabled', 'disabled');
     socket.emit('login', {username: username});
+  }
+  function timestamp(t) {
+    var hours = t.getHours();
+    var minutes = t.getMinutes().toString();
+    if (minutes.length == 1) {
+      minutes = "0" + minutes;
+    }
+    return hours + ":" + minutes;
   }
 
   // bind jquery event handlers
