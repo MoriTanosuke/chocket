@@ -22,13 +22,6 @@ function escapeHTML(string) {
   return replaceURLWithHTMLLinks(string.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
 }
 
-function highlight(searchFor, string) {
-  if(string.indexOf(searchFor) >= 0) {
-    string = '<span class="highlight">' + string + '</span>';
-  }
-  return string;
-}
-
 function replaceURLWithHTMLLinks(text) {
     var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
     return text.replace(exp,"<a href='$1'>$1</a>"); 

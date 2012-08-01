@@ -50,6 +50,9 @@ a {
   background: inherit;
   border-top: 5px solid rgb(119, 51, 51);
 }
+.message {
+  color: white;
+}
 </style>
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery.min.js"></script>
@@ -85,7 +88,7 @@ a {
       unread = 0;
     }
     document.title = '(' + (unread++) + ')';
-    $('#chat').append('<p>' + data['source'] + ': '  + data['msg'] + '</p>');
+    $('#chat').append('<p><span class="username">' + data['source'] + '</span>: <span class="message">'  + data['msg'] + '</span></p>');
   });
 
   function login() {
