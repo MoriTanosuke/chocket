@@ -17,10 +17,14 @@ a {
 #chat {
   position: absolute;
   top: 0px;
+  bottom: 2em;
+  left: 5px;
+  right: 5px;
   margin: auto;
   color: rgb(85, 85, 85);
   font-size: 1.2em;
   line-height: 1.2em;
+  overflow-y: hidden;
 }
 #chat * {
   margin: 0px;
@@ -99,6 +103,7 @@ a {
     }
     document.title = '(' + (unread++) + ') chat';
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
+    scrollDown('chat');
   });
 
   function login() {
@@ -124,6 +129,11 @@ a {
     }
   });
   });
+
+  function scrollDown(id) {
+    var objDiv = document.getElementById(id);
+    objDiv.scrollTop = objDiv.scrollHeight;
+  }
 </script>
 </head>
 <body>
