@@ -48,9 +48,12 @@ var room = 'Lobby';
 
 var chat = io.of('/chat').on('connection', function (socket) {
   socket.on('login', function (data) {
-    if(isDuplicate(data['username'])) {
+    if(data['username'] == '') {
+      console.log('No username given');
+      socket.emit('faillogin', {timestamp: new Date(), users: users, reason: 'No username given'});
+    } else if (isDuplicate(data['username'])) {
       console.log('Username ' + data['username'] + ' already in use');
-      socket.emit('faillogin', {users: users, reason: 'Username already taken'});
+      socket.emit('faillogin', {timestamp: new Date(), users: users, reason: 'Username already taken'});
     } else {
       var time = new Date();
       console.log('User ' + data['username'] + ' joined');
