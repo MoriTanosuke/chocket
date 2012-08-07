@@ -101,7 +101,6 @@ var chat = io.of('/chat').on('connection', function (socket) {
         socket.broadcast.emit('msg', msg);
 	// add message to FIFO
         queue.push(msg);
-        console.log("queue size: " + queue.length);
 	if(queue.length > 10) queue.shift();
         socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg']), timestamp: time});
       });
