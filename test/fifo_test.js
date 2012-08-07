@@ -1,43 +1,11 @@
 var vows = require('vows')
-  , assert = require('assert');
+  , assert = require('assert')
+  , fifo = require('../fifo.js');
 
-function FIFO(size, initial) {
-  size = (size || 10);
-  initial = (initial || []);
-  var queue = Array.apply(null, initial);
-  queue.size = size;
-  //redefine
-  queue.push = FIFO.push;
-  queue.pop = FIFO.pop;
-
-  FIFO.trim.call(queue);
-
-  return(queue);
-}
-
-FIFO.trim = function() {
-  if(this.length < this.size) {
-    // no trimming needed
-    return;
-  };
-  Array.prototype.slice.call(this, 0, this.size);
-}
-FIFO.wrapMethod = function(methodName, trimMethod) {
-  var wrapper = function() {
-    var method = Array.prototype[methodName];
-    var result = method.apply(this, arguments);
-    trimMethod.call(this);
-    return(result);
-  };
-  return(wrapper);
-}
-FIFO.shift = FIFO.wrapMethod("shift", FIFO.trim);
-FIFO.push = FIFO.wrapMethod("push", FIFO.shift);
-
-var suite = vows.describe('FIFO').addBatch({
-  'A FIFO': {
+var suite = vows.describe('fifo').addBatch({
+  'A fifo': {
     'with zero elements': {
-      topic: FIFO(),
+      topic: fifo.FIFO(),
       'has length of 0': function(topic) {
         assert.equal(topic.length, 0);
       },
@@ -46,7 +14,7 @@ var suite = vows.describe('FIFO').addBatch({
       }
     },
     'with elements [1, 2, 3]': {
-      topic: FIFO(undefined, [1, 2, 3]),
+      topic: fifo.FIFO(undefined, [1, 2, 3]),
       'has length of 3': function(topic) {
         assert.equal(topic.length, 3);
       },
@@ -55,7 +23,7 @@ var suite = vows.describe('FIFO').addBatch({
       }
     },
     'with max=5': {
-      topic: FIFO(5, [1, 2, 3, 4, 5]),
+      topic: fifo.FIFO(5, [1, 2, 3, 4, 5]),
       'has always max 5 elements after push': function(topic) {
         assert.equal(topic.size, 5);
         assert.equal(topic.length, 5);
