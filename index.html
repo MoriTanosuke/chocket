@@ -8,6 +8,8 @@ body {
   background: black;
   color: white;
   font-family: DejaVu Sans Mono, fixed;
+  margin: 0;
+  padding: 0;
 }
 a {
   color: #a00;
@@ -16,11 +18,13 @@ a {
   color: red;
 }
 #chat {
-  margin: auto;
   color: rgb(85, 85, 85);
   font-size: 1.2em;
   line-height: 1.2em;
   overflow-y: auto;
+  margin: 0;
+  padding: 10px;
+  word-wrap: break-word;
 }
 #chat * {
   margin: 0px;
@@ -43,8 +47,7 @@ a {
   position: absolute;
   bottom: 1px;
   left: 0px;
-  right: 0px;
-  margin: auto;
+  right: 10px; /*needs to be equal to total left and right padding*/
   padding-left: 5px;
   padding-right: 5px;
   height: 30px;
@@ -52,7 +55,8 @@ a {
 #msg {
   color: white;
   display: none;
-  width: 99%;
+  width:100%;
+  margin: 0;
   border: none;
   line-height: 1.2em;
   padding: 5px;
@@ -73,19 +77,19 @@ a {
     // hide username + connect, show disconnect
     $('#username').css('display', 'none');
     $('#connect').css('display', 'none');
-    $('#msg').css('display', 'inline').focus();
+    $('#msg').css('display', 'block').focus();
   });
   socket.on('faillogin', function(data) {
     $('#chat').append('<p class="error">' + data['reason'] + '</p>');
-    $('#username').css('display', 'inline');
-    $('#connect').css('display', 'inline');
+    $('#username').css('display', 'block');
+    $('#connect').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
   socket.on('disconnect', function() {
     $('#chat').append('<p>You are disconnected.</p>');
-    $('#username').css('display', 'inline');
-    $('#connect').css('display', 'inline');
+    $('#username').css('display', 'block');
+    $('#connect').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
@@ -137,9 +141,9 @@ a {
 	  });
 	  
 	  function resizeWindow(){
-	    var totalHeight = $(window).height();
-		var msgHeight = $("#controls").height();
-		$("#chat").height(totalHeight - (msgHeight + 10));
+	    var totalHeight = $(window).innerHeight();
+		var msgHeight = $("#controls").innerHeight();
+		$("#chat").height(totalHeight - (msgHeight + 25));
 		console.log("resizing window");
       };
 	  
