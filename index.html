@@ -63,6 +63,10 @@ a {
   background: inherit;
   border-top: 5px solid rgb(119, 51, 51);
 }
+#username{
+	margin-right:5px;
+}
+
 </style>
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery.min.js"></script>
@@ -81,7 +85,7 @@ a {
   });
   socket.on('faillogin', function(data) {
     $('#chat').append('<p class="error">' + data['reason'] + '</p>');
-    $('#username').css('display', 'block');
+    $('#username').css({'display':'block', 'float':'left'});
     $('#connect').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
@@ -101,6 +105,12 @@ a {
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
     scrollDown('chat');
   });
+  socket.on('notice', function(data) {
+    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
+  });
+  socket.on('error', function(data) {
+    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="error">' + data['msg'] + '</span></p>');
+  });
 
   function login() {
     username = $('#username').val();
@@ -119,14 +129,14 @@ a {
   // bind jquery event handlers
   $(document).ready(function() {
 	  $('#msg').keyup(function(event) {
-		if(event.keyCode == 13) {
+		if(event.keyCode == 13 && event.target.value != '') {
 		  socket.emit('msg', {msg: event.target.value});
 		  event.target.value = '';
 		}
 	  });
 	  
 	  $("#username").keyup(function(event){
-		if(event.keyCode == 13) {
+		if(event.keyCode == 13 && event.target.value != '') {
 			login();
 		}
 	  });
@@ -149,8 +159,17 @@ a {
 	  
 	  $(window).bind("resize",resizeWindow);
 	  setTimeout(resizeWindow,100);
+
+	  // webkit
+  $('#chat').bind('mousewheel', function(e) {
+    var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
+    $(this).scrollTop(scrollTop);
   });
-  
+  $('#chat').bind('DOMMouseScroll', function(e) {
+    var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
+    $(this).scrollTop(scrollTop);
+  });
+});
 
   function scrollDown(id) {
     var objDiv = document.getElementById(id);
