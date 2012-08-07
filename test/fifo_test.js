@@ -31,8 +31,8 @@ FIFO.wrapMethod = function(methodName, trimMethod) {
   };
   return(wrapper);
 }
-FIFO.push = FIFO.wrapMethod("push", FIFO.trim);
-FIFO.pop = FIFO.wrapMethod("shift", FIFO.trim);
+FIFO.shift = FIFO.wrapMethod("shift", FIFO.trim);
+FIFO.push = FIFO.wrapMethod("push", FIFO.shift);
 
 var suite = vows.describe('FIFO').addBatch({
   'A FIFO': {
@@ -57,11 +57,11 @@ var suite = vows.describe('FIFO').addBatch({
     'with max=5': {
       topic: FIFO(5, [1, 2, 3, 4, 5]),
       'has always max 5 elements after push': function(topic) {
+        assert.equal(topic.size, 5);
         assert.equal(topic.length, 5);
         topic.push(6);
         assert.equal(topic.length, 5);
-        assert.equal(topic.shift(), 2);
-        assert.equal(topic.length, 4);
+        assert.equal(topic.join(','), '2,3,4,5,6');
       }
     }
   }
