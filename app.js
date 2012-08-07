@@ -1,9 +1,11 @@
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
-  , fs = require('fs')
+  , fs = require('fs');
 
 // we're using herokus PORT or 8888 locally
 app.listen(process.env.PORT || 8888);
+
+// create FIFO for last sent messages
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
@@ -43,6 +45,7 @@ function isDuplicate(username) {
   return false;
 }
 
+var queue = new Array();
 var users = new Array();
 var room = 'Lobby';
 
@@ -62,6 +65,12 @@ var chat = io.of('/chat').on('connection', function (socket) {
         users.push(data['username']);
       });
       socket.emit('ready', {timestamp: time, room: room, username: data['username'], users: users});
+      if(queue && queue.length > 0) {
+        socket.emit('notice', {timestamp: time, msg: 'Sending your the last ' + queue.length + ' messages...'});
+        for(i in queue) {
+          socket.emit('msg', queue[i]);
+        }
+      }
     }
   });
   socket.on('disconnect', function() {
@@ -88,7 +97,12 @@ var chat = io.of('/chat').on('connection', function (socket) {
       }
     } else {
       socket.get('username', function(err, username) {
-        socket.broadcast.emit('msg', {source: username, msg: escapeHTML(data['msg']), timestamp: time});
+        var msg = {source: username, msg: escapeHTML(data['msg']), timestamp: time};
+        socket.broadcast.emit('msg', msg);
+	// add message to FIFO
+        queue.push(msg);
+        console.log("queue size: " + queue.length);
+	if(queue.length > 10) queue.shift();
         socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg']), timestamp: time});
       });
     }
