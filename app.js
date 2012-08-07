@@ -61,7 +61,7 @@ var chat = io.of('/chat').on('connection', function (socket) {
       var time = new Date();
       console.log('User ' + data['username'] + ' joined');
       socket.set('username', data['username'], function() {
-        socket.broadcast.emit('msg', {source: data['username'], msg: 'User joined'});
+        socket.broadcast.emit('msg', {timestamp: time, source: data['username'], msg: 'User joined'});
         users.push(data['username']);
       });
       socket.emit('ready', {timestamp: time, room: room, username: data['username'], users: users});
