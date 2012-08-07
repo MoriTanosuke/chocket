@@ -105,6 +105,12 @@ a {
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
     scrollDown('chat');
   });
+  socket.on('notice', function(data) {
+    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
+  });
+  socket.on('error', function(data) {
+    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="error">' + data['msg'] + '</span></p>');
+  });
 
   function login() {
     username = $('#username').val();

@@ -78,11 +78,20 @@ var chat = io.of('/chat').on('connection', function (socket) {
   });
 
   socket.on('msg', function(data) {
-    socket.get('username', function(err, username) {
-      var time = new Date();
-      socket.broadcast.emit('msg', {source: username, msg: escapeHTML(data['msg']), timestamp: time});
-      socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg']), timestamp: time});
-    });
+    var time = new Date();
+    if(data['msg'][0] === '/') {
+      // special commands
+      if(data['msg'] === '/users') {
+        socket.emit('notice', {timestamp: time, msg: 'Users: ' + users.join(',')});
+      } else {
+        socket.emit('error', {timestamp: time, msg: 'Unknown command'});
+      }
+    } else {
+      socket.get('username', function(err, username) {
+        socket.broadcast.emit('msg', {source: username, msg: escapeHTML(data['msg']), timestamp: time});
+        socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg']), timestamp: time});
+      });
+    }
   });
 });
 
