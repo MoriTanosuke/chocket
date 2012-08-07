@@ -128,10 +128,11 @@ a {
       event.target.value = '';
     }
   });
+
+  // webkit
   $('#chat').bind('mousewheel', function(e) {
     var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
     $(this).scrollTop(scrollTop);
-  });
   });
 
   function scrollDown(id) {
