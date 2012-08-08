@@ -100,8 +100,10 @@ a {
   socket.on('msg', function(data) {
     if(document.hasFocus()) {
       unread = 0;
-    }
-    document.title = '(' + (unread++) + ') chat';
+    }else{
+		unread++;
+	}
+    document.title = '(' + unread + ') chat';
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
     scrollDown('chat');
   });
