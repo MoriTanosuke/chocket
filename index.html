@@ -128,55 +128,56 @@ a {
     return hours + ":" + minutes;
   }
 
-  // bind jquery event handlers
-  $(document).ready(function() {
-	  $('#msg').keyup(function(event) {
-		if(event.keyCode == 13 && event.target.value != '') {
-		  socket.emit('msg', {msg: event.target.value});
-		  event.target.value = '';
-		}
-	  });
-	  
-	  $("#username").keyup(function(event){
-		if(event.keyCode == 13 && event.target.value != '') {
-			login();
-		}
-	  });
-	  
-	  $("#connect").click(function(event){
-		login();
-	  });
-	  
-	  $('#chat').bind('mousewheel', function(e) {
-		var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
-		$(this).scrollTop(scrollTop);
-	  });
-	  
-	  function resizeWindow(){
-	    var totalHeight = $(window).innerHeight();
-		var msgHeight = $("#controls").innerHeight();
-		$("#chat").height(totalHeight - (msgHeight + 25));
-		console.log("resizing window");
-      };
-	  
-	  $(window).bind("resize",resizeWindow);
-	  setTimeout(resizeWindow,100);
-
-	  // webkit
-  $('#chat').bind('mousewheel', function(e) {
-    var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
-    $(this).scrollTop(scrollTop);
-  });
-  $('#chat').bind('DOMMouseScroll', function(e) {
-    var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
-    $(this).scrollTop(scrollTop);
-  });
-});
+  function resizeWindow(){
+    var totalHeight = $(window).innerHeight();
+    var msgHeight = $("#controls").innerHeight();
+    $("#chat").height(totalHeight - (msgHeight + 25));
+    scrollDown('chat');
+  };
 
   function scrollDown(id) {
     var objDiv = document.getElementById(id);
     objDiv.scrollTop = objDiv.scrollHeight;
   }
+
+  // bind jquery event handlers
+  $(document).ready(function() {
+    $('#msg').keyup(function(event) {
+	if(event.keyCode == 13 && event.target.value != '') {
+	  socket.emit('msg', {msg: event.target.value});
+	  event.target.value = '';
+	}
+    });
+  
+    $("#username").keyup(function(event){
+	if(event.keyCode == 13 && event.target.value != '') {
+		login();
+	}
+    });
+  
+    $("#connect").click(function(event){
+	login();
+    });
+  
+    $('#chat').bind('mousewheel', function(e) {
+	var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
+	$(this).scrollTop(scrollTop);
+    });
+
+    $(window).bind("resize",resizeWindow);
+    setTimeout(resizeWindow,100);
+
+    // webkit
+    $('#chat').bind('mousewheel', function(e) {
+      var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
+      $(this).scrollTop(scrollTop);
+    });
+
+    $('#chat').bind('DOMMouseScroll', function(e) {
+      var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
+      $(this).scrollTop(scrollTop);
+    });
+  });
 </script>
 </head>
 <body>
