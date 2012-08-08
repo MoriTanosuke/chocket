@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Chat</title>
@@ -7,6 +8,8 @@ body {
   background: black;
   color: white;
   font-family: DejaVu Sans Mono, fixed;
+  margin: 0;
+  padding: 0;
 }
 a {
   color: #a00;
@@ -15,16 +18,13 @@ a {
   color: red;
 }
 #chat {
-  position: absolute;
-  top: 0px;
-  bottom: 2em;
-  left: 5px;
-  right: 5px;
-  margin: auto;
   color: rgb(85, 85, 85);
   font-size: 1.2em;
   line-height: 1.2em;
-  overflow-y: hidden;
+  overflow-y: auto;
+  margin: 0;
+  padding: 10px;
+  word-wrap: break-word;
 }
 #chat * {
   margin: 0px;
@@ -45,28 +45,28 @@ a {
 
 #controls {
   position: absolute;
-  bottom: 0px;
+  bottom: 1px;
   left: 0px;
-  right: 0px;
-  margin: auto;
+  right: 10px; /*needs to be equal to total left and right padding*/
   padding-left: 5px;
-  padding-right: 5px
+  padding-right: 5px;
+  height: 30px;
 }
 #msg {
   color: white;
   display: none;
-  left: 0;
-  right: 0;
-  width: 100%;
+  width:100%;
+  margin: 0;
   border: none;
   line-height: 1.2em;
   padding: 5px;
-  left: 0;
-  right: 0;
-  width: 100%;
   background: inherit;
   border-top: 5px solid rgb(119, 51, 51);
 }
+#username{
+	margin-right:5px;
+}
+
 </style>
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery.min.js"></script>
@@ -81,19 +81,19 @@ a {
     // hide username + connect, show disconnect
     $('#username').css('display', 'none');
     $('#connect').css('display', 'none');
-    $('#msg').css('display', 'inline');
+    $('#msg').css('display', 'block').focus();
   });
   socket.on('faillogin', function(data) {
     $('#chat').append('<p class="error">' + data['reason'] + '</p>');
-    $('#username').css('display', 'inline');
-    $('#connect').css('display', 'inline');
+    $('#username').css({'display':'block', 'float':'left'});
+    $('#connect').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
   socket.on('disconnect', function() {
     $('#chat').append('<p>You are disconnected.</p>');
-    $('#username').css('display', 'inline');
-    $('#connect').css('display', 'inline');
+    $('#username').css('display', 'block');
+    $('#connect').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
@@ -126,30 +126,56 @@ a {
     return hours + ":" + minutes;
   }
 
-  // bind jquery event handlers
-  $(document).ready(function() {
-  $('#msg').keyup(function(event) {
-    if(event.keyCode == 13 && event.target.value != '') {
-      socket.emit('msg', {msg: event.target.value});
-      event.target.value = '';
-    }
-  });
-
-  // webkit
-  $('#chat').bind('mousewheel', function(e) {
-    var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
-    $(this).scrollTop(scrollTop);
-  });
-  $('#chat').bind('DOMMouseScroll', function(e) {
-    var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
-    $(this).scrollTop(scrollTop);
-  });
-  });
+  function resizeWindow(){
+    var totalHeight = $(window).innerHeight();
+    var msgHeight = $("#controls").innerHeight();
+    $("#chat").height(totalHeight - (msgHeight + 25));
+    scrollDown('chat');
+  };
 
   function scrollDown(id) {
     var objDiv = document.getElementById(id);
     objDiv.scrollTop = objDiv.scrollHeight;
   }
+
+  // bind jquery event handlers
+  $(document).ready(function() {
+    $('#msg').keyup(function(event) {
+	if(event.keyCode == 13 && event.target.value != '') {
+	  socket.emit('msg', {msg: event.target.value});
+	  event.target.value = '';
+	}
+    });
+  
+    $("#username").keyup(function(event){
+	if(event.keyCode == 13 && event.target.value != '') {
+		login();
+	}
+    });
+  
+    $("#connect").click(function(event){
+	login();
+    });
+  
+    $('#chat').bind('mousewheel', function(e) {
+	var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
+	$(this).scrollTop(scrollTop);
+    });
+
+    $(window).bind("resize",resizeWindow);
+    setTimeout(resizeWindow,100);
+
+    // webkit
+    $('#chat').bind('mousewheel', function(e) {
+      var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
+      $(this).scrollTop(scrollTop);
+    });
+
+    $('#chat').bind('DOMMouseScroll', function(e) {
+      var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
+      $(this).scrollTop(scrollTop);
+    });
+  });
 </script>
 </head>
 <body>
@@ -157,9 +183,9 @@ a {
 <div id="chat"></div>
 <div id="controls">
 <input type="text" id="username" value="" placeholder="Enter your name" />
-<button id="connect" onclick="login()">Connect</button>
+<button id="connect">Connect</button>
 <input type="text" id="msg" placeholder="Enter your message here" />
-</control>
+</div>
 </body>
 </html>
 
