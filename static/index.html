@@ -106,7 +106,12 @@ a {
     document.title = '(' + (unread++) + ') chat';
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : " " + data['source']) + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
     scrollDown('chat');
-    $('.username').ColorPicker();
+    $('.' + data['source']).ColorPicker({
+      onChange: function(hsb, hex, rgb) {
+        $('.' + data['source']).css('color', '#' + hex);
+        $(this).ColorPickerHide();
+      }
+    });
   });
   socket.on('notice', function(data) {
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
