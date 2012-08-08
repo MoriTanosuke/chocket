@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Chat</title>
+<link rel="stylesheet" media="screen" type="text/css" href="css/colorpicker.css" />
 <link href='http://fonts.googleapis.com/css?family=Capriola' rel='stylesheet' type='text/css'>
 <style type="text/css">
 body {
@@ -70,6 +71,7 @@ a {
 </style>
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery.min.js"></script>
+<script type="text/javascript" src="js/colorpicker.js"></script>
 <script>
   var socket = io.connect('/chat');
   var unread = 0;
@@ -102,8 +104,9 @@ a {
       unread = 0;
     }
     document.title = '(' + (unread++) + ') chat';
-    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
+    $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : " " + data['source']) + '">' + data['source'] + '</span>: <span class="messagetext">'  + data['msg'] + '</span></p>');
     scrollDown('chat');
+    $('.username').ColorPicker();
   });
   socket.on('notice', function(data) {
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
@@ -175,6 +178,8 @@ a {
       var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
       $(this).scrollTop(scrollTop);
     });
+
+    $('.you').ColorPicker({});
   });
 </script>
 </head>
