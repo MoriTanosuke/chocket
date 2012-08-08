@@ -1,23 +1,26 @@
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
+  , url = require('url')
+  , path = require('path')
   , fs = require('fs');
 
 // we're using herokus PORT or 8888 locally
 app.listen(process.env.PORT || 8888);
 
-// create FIFO for last sent messages
-
 function handler (req, res) {
-  fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
+  var uri = url.parse(req.url).pathname;
+  // root eq index.html
+  if(uri === '/') uri = "index.html";
+  // load files from directory 'static'
+  var filename = path.join(process.cwd(), "static" , uri);
+  fs.readFile(filename, function(err, data) {
+    if(err) {
       res.writeHead(500);
-      return res.end('Error loading index.html');
+      return res.end('Can not read file');
     }
-
     res.writeHead(200);
     res.end(data);
-  });
+  });  
 }
 
 function escapeHTML(string) {
