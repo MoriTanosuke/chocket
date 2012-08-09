@@ -66,7 +66,7 @@ var chat = io.of('/chat').on('connection', function (socket) {
       });
       socket.emit('ready', {timestamp: time, room: room, username: data['username'], users: users});
       if(queue && queue.length > 0) {
-        socket.emit('notice', {timestamp: time, msg: 'Sending your the last ' + queue.length + ' messages...'});
+        socket.emit('notice', {timestamp: time, msg: 'Sending you the last ' + queue.length + ' recent messages...'});
         for(i in queue) {
           socket.emit('msg', queue[i]);
         }
