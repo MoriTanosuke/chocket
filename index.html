@@ -100,6 +100,7 @@ a {
     $('#connect').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
+    document.title = 'disconnected ' + document.title;
   });
   socket.on('msg', function(data) {
     if(document.hasFocus()) {
