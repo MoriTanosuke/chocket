@@ -1,23 +1,40 @@
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
-  , fs = require('fs');
+  , fs = require('fs')
+  , emotes = require('./emoticons.js');
 
 // we're using herokus PORT or 8888 locally
-app.listen(process.env.PORT || 8888);
+var port = process.env.PORT || 8888;
+app.listen(port);
+console.log("Application running on port " + port);
 
 // create FIFO for last sent messages
 
 function handler (req, res) {
-  fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
-
-    res.writeHead(200);
-    res.end(data);
-  });
+  // check if we should serve an image
+  var filePath = '.' + req.url;
+  if(filePath.indexOf('./img/') == 0) {
+    fs.readFile(filePath, function(err, data) {
+      if(err) {
+        console.log("Something went wrong while serving an image from " + filePath);
+        res.writeHead(200); // we're silently supressing output
+        return res.end();
+      }
+      res.writeHead(200);
+      return res.end(data);
+    });
+  } else {
+    fs.readFile(__dirname + '/index.html',
+    function (err, data) {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading index.html');
+      }
+  
+      res.writeHead(200);
+      res.end(data);
+    });
+  }
 }
 
 function escapeHTML(string) {
@@ -97,12 +114,12 @@ var chat = io.of('/chat').on('connection', function (socket) {
       }
     } else {
       socket.get('username', function(err, username) {
-        var msg = {source: username, msg: escapeHTML(data['msg']), timestamp: time};
+        var msg = {source: username, msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
         socket.broadcast.emit('msg', msg);
 	// add message to FIFO
         queue.push(msg);
 	if(queue.length > 10) queue.shift();
-        socket.emit('msg', {source: 'You', msg: escapeHTML(data['msg']), timestamp: time});
+        socket.emit('msg', {source: 'You', msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time});
       });
     }
   });
