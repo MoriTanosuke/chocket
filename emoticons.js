@@ -10,14 +10,14 @@ var emoticons = {
 };
 
 var patterns = {
-  smile: /:-\)/gm,
-  sad: /:-\(/gm,
-  wink: /;-\)/gm,
-  plain: /:-\|/gm,
-  grin: /:-D/gm,
-  surprise: /:-O/gm,
-  tongue: /:-P/gm,
-  dazed: /%-\)/gm,
+  smile: /:-?\)/gm,
+  sad: /:-?\(/gm,
+  wink: /;-?\)/gm,
+  plain: /:-?\|/gm,
+  grin: /:-?D/gm,
+  surprise: /:-?O/gm,
+  tongue: /:-?P/gm,
+  dazed: /%-?\)/gm,
 };
 
 exports.replace = function(string) {
