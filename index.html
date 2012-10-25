@@ -78,7 +78,7 @@ a {
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery.min.js"></script>
 <script>
-  var socket = io.connect('/chat');
+  var socket = io.connect('/');
   var unread = 0;
   var username = 'John Doe';
 
@@ -108,8 +108,8 @@ a {
   socket.on('msg', function(data) {
     if(document.hasFocus()) {
       unread = 0;
-    }else{
-		unread++;
+    } else {
+      unread++;
     }
     document.title = '(' + unread + ') chat';
 

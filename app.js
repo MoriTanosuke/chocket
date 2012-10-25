@@ -57,9 +57,9 @@ function isDuplicate(username) {
 
 var queue = new Array();
 var users = new Array();
-var room = 'Lobby';
 
-var chat = io.of('/chat').on('connection', function (socket) {
+io.sockets.on('connection', function(socket) {
+  var room = 'Lobby';
   socket.on('login', function (data) {
     if(data['username'] == '') {
       console.log('No username given');
@@ -70,11 +70,12 @@ var chat = io.of('/chat').on('connection', function (socket) {
     } else {
       var time = new Date();
       console.log('User ' + data['username'] + ' joined');
+      socket.join(room);
       socket.set('username', data['username'], function() {
-        socket.broadcast.emit('msg', {timestamp: time, source: data['username'], msg: 'User joined'});
+        socket.broadcast.to(room).emit('msg', {timestamp: time, source: data['username'], msg: 'User joined'});
         users.push(data['username']);
       });
-      socket.emit('ready', {timestamp: time, room: room, username: data['username'], users: users});
+      socket.emit('ready', {timestamp: time, username: data['username'], users: users});
       if(queue && queue.length > 0) {
         socket.emit('notice', {timestamp: time, msg: 'Sending you the last ' + queue.length + ' recent messages...'});
         for(i in queue) {
@@ -92,7 +93,7 @@ var chat = io.of('/chat').on('connection', function (socket) {
       }
       var time = new Date();
       console.log('User ' + username + ' left');
-      socket.broadcast.emit('msg', {timestamp: time, source: username, msg: 'User left'});
+      socket.broadcast.to(room).emit('msg', {timestamp: time, source: username, msg: 'User left'});
     });
   });
 
@@ -102,13 +103,23 @@ var chat = io.of('/chat').on('connection', function (socket) {
       // special commands
       if(data['msg'] === '/users') {
         socket.emit('notice', {timestamp: time, msg: 'Users: ' + users.join(',')});
+      } else if(data['msg'].indexOf('/join') == 0) {
+socket.get('username', function(err, username) {
+        console.log('join ' + room);
+        socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + username + ' left this channel.'});
+        socket.leave(room);
+        room = data['msg'].match(/\w+$/);
+        socket.join(room);
+        socket.emit('notice', {timestamp: time, msg: 'You switched to room ' + room});
+        socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + username + ' joined this channel', username: ''});
+});
       } else {
         socket.emit('error', {timestamp: time, msg: 'Unknown command'});
       }
     } else {
       socket.get('username', function(err, username) {
         var msg = {source: username, msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
-        socket.broadcast.emit('msg', msg);
+        socket.broadcast.to(room).emit('msg', msg);
 	// add message to FIFO
         queue.push(msg);
 	if(queue.length > 10) queue.shift();
@@ -117,6 +128,4 @@ var chat = io.of('/chat').on('connection', function (socket) {
     }
   });
 });
-
-
 
