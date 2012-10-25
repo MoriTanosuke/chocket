@@ -55,8 +55,17 @@ function isDuplicate(username) {
   return false;
 }
 
-var queue = new Array();
+var queue = {};
 var users = new Array();
+
+function resendQueue(room, socket) {
+  if(queue[room] && queue[room].length > 0) {
+    socket.emit('notice', {timestamp: new Date(), msg: 'Sending you the last ' + queue[room].length + ' recent messages...'});
+    for(i in queue[room]) {
+      socket.emit('msg', queue[room][i]);
+    }
+  }
+}
 
 io.sockets.on('connection', function(socket) {
   var room = 'Lobby';
@@ -76,12 +85,7 @@ io.sockets.on('connection', function(socket) {
         users.push(data['username']);
       });
       socket.emit('ready', {timestamp: time, username: data['username'], users: users});
-      if(queue && queue.length > 0) {
-        socket.emit('notice', {timestamp: time, msg: 'Sending you the last ' + queue.length + ' recent messages...'});
-        for(i in queue) {
-          socket.emit('msg', queue[i]);
-        }
-      }
+      resendQueue(room, socket);
     }
   });
   socket.on('disconnect', function() {
@@ -113,6 +117,7 @@ socket.get('username', function(err, username) {
         socket.emit('notice', {timestamp: time, msg: 'You switched to room ' + room});
         socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + username + ' joined this channel', username: ''});
 });
+        resendQueue(room, socket);
       } else {
         socket.emit('error', {timestamp: time, msg: 'Unknown command'});
       }
@@ -121,8 +126,9 @@ socket.get('username', function(err, username) {
         var msg = {source: username, msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
         socket.broadcast.to(room).emit('msg', msg);
 	// add message to FIFO
-        queue.push(msg);
-	if(queue.length > 10) queue.shift();
+        if(!queue[room]) {queue[room] = [];}
+        queue[room].push(msg);
+	if(queue[room].length > 10) queue[room].shift();
         socket.emit('msg', {source: 'You', msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time});
       });
     }
