@@ -81,10 +81,10 @@ io.sockets.on('connection', function(socket) {
       console.log('User ' + data['username'] + ' joined');
       socket.join(room);
       socket.set('username', data['username'], function() {
-        socket.broadcast.to(room).emit('msg', {timestamp: time, source: data['username'], msg: 'User joined'});
+        socket.broadcast.to(room).emit('msg', {timestamp: time, source: escapeHTML(data['username']), msg: 'User joined'});
         users.push(data['username']);
       });
-      socket.emit('ready', {timestamp: time, username: data['username'], users: users});
+      socket.emit('ready', {timestamp: time, username: escapeHTML(data['username']), users: users});
       resendQueue(room, socket);
     }
   });
@@ -97,7 +97,7 @@ io.sockets.on('connection', function(socket) {
       }
       var time = new Date();
       console.log('User ' + username + ' left');
-      socket.broadcast.to(room).emit('msg', {timestamp: time, source: username, msg: 'User left'});
+      socket.broadcast.to(room).emit('msg', {timestamp: time, source: escapeHTML(username), msg: 'User left'});
     });
   });
 
@@ -123,7 +123,7 @@ socket.get('username', function(err, username) {
       }
     } else {
       socket.get('username', function(err, username) {
-        var msg = {source: username, msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
+        var msg = {source: escapeHTML(username), msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
         socket.broadcast.to(room).emit('msg', msg);
 	// add message to FIFO
         if(!queue[room]) {queue[room] = [];}
