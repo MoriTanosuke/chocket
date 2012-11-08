@@ -38,6 +38,7 @@ function handler (req, res) {
 }
 
 function escapeHTML(string) {
+  string = string || "";
   return replaceURLWithHTMLLinks(string.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
 }
 
@@ -84,7 +85,7 @@ io.sockets.on('connection', function(socket) {
         socket.broadcast.to(room).emit('msg', {timestamp: time, source: escapeHTML(data['username']), msg: 'User joined'});
         users.push(data['username']);
       });
-      socket.emit('ready', {timestamp: time, username: escapeHTML(data['username']), users: users});
+      socket.emit('ready', {timestamp: time, username: escapeHTML(data['username']), users: escapeHTML(users.join(','))});
       resendQueue(room, socket);
     }
   });
@@ -106,7 +107,7 @@ io.sockets.on('connection', function(socket) {
     if(data['msg'][0] === '/') {
       // special commands
       if(data['msg'] === '/users') {
-        socket.emit('notice', {timestamp: time, msg: 'Users: ' + users.join(',')});
+        socket.emit('notice', {timestamp: time, msg: 'Users: ' + escapeHTML(users.join(','))});
       } else if(data['msg'].indexOf('/join') == 0) {
 socket.get('username', function(err, username) {
         console.log('join ' + room);

@@ -87,7 +87,7 @@ input:-moz-placeholder {
 
   socket.on('ready', function (data) {
     $('#chat').append('<p>You are logged in.</p>');
-    $('#chat').append('<p>Users: ' + data['users'].join(',') + '</p>');
+    $('#chat').append('<p>Users: ' + data['users'] + '</p>');
     // hide username + connect, show disconnect
     $('#username').css('display', 'none');
     $('#connect').css('display', 'none');
