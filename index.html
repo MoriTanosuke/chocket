@@ -91,12 +91,14 @@ input:-moz-placeholder {
     // hide username + connect, show disconnect
     $('#username').css('display', 'none');
     $('#connect').css('display', 'none');
+    $('#reqNotifyPerm').css('display', 'none');
     $('#msg').css('display', 'block').focus();
   });
   socket.on('faillogin', function(data) {
     $('#chat').append('<p class="error">' + data['reason'] + '</p>');
     $('#username').css({'display':'block', 'float':'left'});
     $('#connect').css('display', 'block');
+    $('#reqNotifyPerm').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
@@ -104,6 +106,7 @@ input:-moz-placeholder {
     $('#chat').append('<p>You are disconnected.</p>');
     $('#username').css('display', 'block');
     $('#connect').css('display', 'block');
+    $('#reqNotifyPerm').css('display', 'block');
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
     document.title = 'disconnected ' + document.title;
@@ -122,6 +125,7 @@ input:-moz-placeholder {
     var pattern = new RegExp("(^|\\s)"+testUsername+"(\\s|$)");
     if(testMsg.match(pattern)){
         mention = "mention";
+        notify(data['source'] + ' said:', data['msg']);
     }
     $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext '+mention+'">'  + data['msg'] + '</span></p>');
     scrollDown('chat');
@@ -197,6 +201,22 @@ input:-moz-placeholder {
       $(this).scrollTop(scrollTop);
     });
   });
+
+function notify(title, msg) {
+  if (window.webkitNotifications) {
+    if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+      n = window.webkitNotifications.createNotification('/img/favicon.png', title, msg);
+      n.show();
+      setTimeout(function(){
+        n.cancel();
+      }, 3000);
+    } else {
+      window.webkitNotifications.requestPermission();
+    }
+  } else {
+    console.log("Notifications are not supported for this Browser/OS version yet.");
+  }
+}
 </script>
 </head>
 <body>
@@ -205,6 +225,7 @@ input:-moz-placeholder {
 <div id="controls">
 <input type="text" id="username" value="" placeholder="Enter your name" />
 <button id="connect">Connect</button>
+<button id="reqNotifyPerm" onclick="notify('Notification enabled', 'Thanks for enabling notifications.');">Allow notifications</button>
 <input type="text" id="msg" placeholder="Enter your message here" />
 </div>
 </body>
