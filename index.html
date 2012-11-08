@@ -91,14 +91,18 @@ input:-moz-placeholder {
     // hide username + connect, show disconnect
     $('#username').css('display', 'none');
     $('#connect').css('display', 'none');
-    $('#reqNotifyPerm').css('display', 'none');
+    if(window.webkitNotifications.checkPermission() == 0) {
+      $('#reqNotifyPerm').css('display', 'none');
+    }
     $('#msg').css('display', 'block').focus();
   });
   socket.on('faillogin', function(data) {
     $('#chat').append('<p class="error">' + data['reason'] + '</p>');
     $('#username').css({'display':'block', 'float':'left'});
     $('#connect').css('display', 'block');
-    $('#reqNotifyPerm').css('display', 'block');
+    if(window.webkitNotifications.checkPermission() == 0) {
+      $('#reqNotifyPerm').css('display', 'block');
+    }
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
   });
@@ -106,7 +110,9 @@ input:-moz-placeholder {
     $('#chat').append('<p>You are disconnected.</p>');
     $('#username').css('display', 'block');
     $('#connect').css('display', 'block');
-    $('#reqNotifyPerm').css('display', 'block');
+    if(window.webkitNotifications.checkPermission() == 0) {
+      $('#reqNotifyPerm').css('display', 'block');
+    }
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
     document.title = 'disconnected ' + document.title;
@@ -201,7 +207,6 @@ input:-moz-placeholder {
       $(this).scrollTop(scrollTop);
     });
   });
-
 function notify(title, msg) {
   if (window.webkitNotifications) {
     if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
@@ -228,6 +233,14 @@ function notify(title, msg) {
 <button id="reqNotifyPerm" onclick="notify('Notification enabled', 'Thanks for enabling notifications.');">Allow notifications</button>
 <input type="text" id="msg" placeholder="Enter your message here" />
 </div>
+
+<script>
+$(document).ready(function(){
+if(window.webkitNotifications.checkPermission() == 0) {
+  $('#reqNotifyPerm').remove();
+}
+});
+</script>
 </body>
 </html>
 
