@@ -23,7 +23,7 @@ function handler (req, res) {
       res.writeHead(200);
       return res.end(data);
     });
-  } else if(filePath.endsWith('.js')) {
+  } else if(filePath.indexOf('.js') > 0 && filePath.indexOf('.js') == (filePath.length - 3)) {
     console.log("Trying to load file " + filePath);
     fs.readFile(filePath,
     function (err, data) {
@@ -151,4 +151,3 @@ socket.get('username', function(err, username) {
     }
   });
 });
-
