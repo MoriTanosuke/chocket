@@ -1,0 +1,7 @@
+{
+  "name": "Chocket",
+  "description": "A simple chat application build with NodeJS.",
+  "repository": "https://github.com/MoriTanosuke/chocket",
+  "logo": "",
+  "keywords": ["node", "nodejs", "chat", "irc"]
+}
