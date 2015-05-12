@@ -8,7 +8,7 @@
   },
   "engines": {
     "node": "v0.12.x",
-    "npm": "1.1.x"
+    "npm": "2.3.x"
   },
   "scripts": {
     "test":"vows test/* --spec",
