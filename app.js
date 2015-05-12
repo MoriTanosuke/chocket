@@ -23,6 +23,19 @@ function handler (req, res) {
       res.writeHead(200);
       return res.end(data);
     });
+  } else if(filePath.endsWith('.js')) {
+    console.log("Trying to load file " + filePath);
+    fs.readFile(filePath,
+    function (err, data) {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading ' + filePath);
+      }
+      res.writeHead(200, {
+        'Content-Type': 'application/x-javascript'
+      });
+      res.end(data);
+    });
   } else {
     fs.readFile(__dirname + '/index.html',
     function (err, data) {
