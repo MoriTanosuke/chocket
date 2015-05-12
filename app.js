@@ -119,8 +119,11 @@ socket.get('username', function(err, username) {
         socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + username + ' joined this channel', username: ''});
 });
         resendQueue(room, socket);
+      } else if(data['msg'].indexOf('/help') == 0) {
+        console.log('help');
+        socket.emit('notice', {timestamp: time, msg: 'Available commands:<ul><li>/users - show list of users</li><li>/join &lt;room&gt; - switch to another chat room</li><li>/help - show this help</li></ul>'});
       } else {
-        socket.emit('error', {timestamp: time, msg: 'Unknown command'});
+        socket.emit('error', {timestamp: time, msg: 'Unknown command. Type /help to see a list of available commands.'});
       }
     } else {
       socket.get('username', function(err, username) {
