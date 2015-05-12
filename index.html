@@ -54,7 +54,7 @@ input:-moz-placeholder {
   right: 10px; /*needs to be equal to total left and right padding*/
   padding-left: 5px;
   padding-right: 5px;
-  height: 30px;
+  height: 60px;
 }
 #msg {
   color: white;
@@ -70,10 +70,9 @@ input:-moz-placeholder {
 .message {
   color: white;
 }
-#username{
+#username {
 	margin-right:5px;
 }
-
 .mention{
 	color: #0090cb;
 }
@@ -91,31 +90,33 @@ input:-moz-placeholder {
     // hide username + connect, show disconnect
     $('#username').css('display', 'none');
     $('#connect').css('display', 'none');
-    if(window.webkitNotifications.checkPermission() == 0) {
+    // show message input
+    $('#msg').css('display', 'block');
+    $('#msg').focus();
+    if(isNotifyEnabled()) {
       $('#reqNotifyPerm').css('display', 'none');
     }
-    $('#msg').css('display', 'block').focus();
   });
   socket.on('faillogin', function(data) {
     $('#chat').append('<p class="error">' + data['reason'] + '</p>');
     $('#username').css({'display':'block', 'float':'left'});
     $('#connect').css('display', 'block');
-    if(window.webkitNotifications.checkPermission() == 0) {
-      $('#reqNotifyPerm').css('display', 'block');
-    }
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
+    if(isNotifyEnabled()) {
+      $('#reqNotifyPerm').css('display', 'block');
+    }
   });
   socket.on('disconnect', function() {
     $('#chat').append('<p>You are disconnected.</p>');
     $('#username').css('display', 'block');
     $('#connect').css('display', 'block');
-    if(window.webkitNotifications.checkPermission() == 0) {
-      $('#reqNotifyPerm').css('display', 'block');
-    }
     $('#connect').removeAttr('disabled');
     $('#msg').css('display', 'none');
     document.title = 'disconnected ' + document.title;
+    if(isNotifyEnabled()) {
+      $('#reqNotifyPerm').css('display', 'block');
+    }
   });
   socket.on('msg', function(data) {
     if(document.hasFocus()) {
@@ -207,9 +208,18 @@ input:-moz-placeholder {
       $(this).scrollTop(scrollTop);
     });
   });
+function isNotifyAvailable() {
+  // checks if notification are enabled
+  //TODO notifications are only for firefox right now
+  return window.webkitNotifications;
+}
+function isNotifyEnabled() {
+  // 0 is PERMISSION_ALLOWED
+  return window.webkitNotifications && (window.webkitNotifications.checkPermission() == 0);
+}
 function notify(title, msg) {
-  if (window.webkitNotifications) {
-    if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+  if (isNotifyAvailable()) {
+    if (isNotifyEnabled()) {
       n = window.webkitNotifications.createNotification('/img/favicon.png', title, msg);
       n.show();
       setTimeout(function(){
@@ -236,9 +246,9 @@ function notify(title, msg) {
 
 <script>
 $(document).ready(function(){
-if(window.webkitNotifications.checkPermission() == 0) {
-  $('#reqNotifyPerm').remove();
-}
+  if(isNotifyEnabled()) {
+    $('#reqNotifyPerm').remove();
+  }
 });
 </script>
 </body>
