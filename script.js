@@ -125,9 +125,9 @@ function enableNotify() {
 function notify(title, msg) {
   if (isNotifyAvailable()) {
     if (isNotifyEnabled()) {
-      n = new Notification(title, {body: msg, icon: '/img/favicon.png'});
-      setTimeout(function(){
-        n.cancel();
+      const n = new Notification(title, {body: msg, icon: '/img/favicon.png'});
+      setTimeout(() => {
+        n.close();
       }, 3000);
     } else {
       enableNotify();
