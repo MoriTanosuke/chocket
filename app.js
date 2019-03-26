@@ -44,7 +44,9 @@ function handler (req, res) {
         return res.end('Error loading index.html');
       }
   
-      res.writeHead(200);
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8'
+      });
       res.end(data);
     });
   }
