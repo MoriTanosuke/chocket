@@ -8,6 +8,7 @@ var username = 'John Doe';
 socket.on('ready', function (data) {
   $('#chat').append('<p>You are logged in.</p>');
   $('#chat').append('<p>Users: ' + data['users'] + '</p>');
+  scrollDown('chat');
   // hide username + connect, show disconnect
   $('#username').css('display', 'none');
   $('#connect').css('display', 'none');
@@ -21,6 +22,7 @@ socket.on('ready', function (data) {
 
 socket.on('faillogin', function(data) {
   $('#chat').append('<p class="error">' + data['reason'] + '</p>');
+  scrollDown('chat');
   $('#username').css({'display':'block', 'float':'left'});
   $('#connect').css('display', 'block');
   $('#connect').removeAttr('disabled');
@@ -32,6 +34,7 @@ socket.on('faillogin', function(data) {
 
 socket.on('disconnect', function() {
   $('#chat').append('<p>You are disconnected.</p>');
+  scrollDown('chat');
   $('#username').css('display', 'block');
   $('#connect').css('display', 'block');
   $('#connect').removeAttr('disabled');
@@ -64,10 +67,12 @@ socket.on('msg', function(data) {
 
 socket.on('notice', function(data) {
   $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
+  scrollDown('chat');
 });
 
 socket.on('error', function(data) {
   $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="error">' + data['msg'] + '</span></p>');
+  scrollDown('chat');
 });
 
 // -------------------------------------------------------------------------
@@ -81,7 +86,7 @@ function login() {
 function timestamp(t) {
   var hours = t.getHours();
   var minutes = t.getMinutes().toString();
-  if (minutes.length == 1) {
+  if (minutes.length === 1) {
     minutes = "0" + minutes;
   }
   return hours + ":" + minutes;

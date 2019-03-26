@@ -98,13 +98,15 @@ io.sockets.on('connection', function (socket) {
       var time = new Date();
       console.log('User ' + data['username'] + ' joined');
       socket.join(room);
-      socket.set('username', data['username'], function () {
-        socket.broadcast.to(room).emit('notice', {
+
+      // store username
+      socket.username = data['username'];
+      socket.broadcast.to(room).emit('notice', {
           timestamp: time,
           msg: 'User ' + escapeHTML(data['username']) + ' joined'
         });
-        users.push(data['username']);
-      });
+      users.push(data['username']);
+
       socket.emit('ready', {
         timestamp: time,
         username: escapeHTML(data['username']),
@@ -114,16 +116,14 @@ io.sockets.on('connection', function (socket) {
     }
   });
   socket.on('disconnect', function () {
-    socket.get('username', function (err, username) {
-      for (i in users) {
-        if (users[i] === username) {
-          users.splice(i, 1);
-        }
+    for (i in users) {
+      if (users[i] === socket.username) {
+        users.splice(i, 1);
       }
-      var time = new Date();
-      console.log('User ' + username + ' left');
-      socket.broadcast.to(room).emit('msg', {timestamp: time, source: escapeHTML(username), msg: 'User left'});
-    });
+    }
+    var time = new Date();
+    console.log('User ' + socket.username + ' left');
+    socket.broadcast.to(room).emit('msg', {timestamp: time, source: escapeHTML(socket.username), msg: 'User left'});
   });
 
   socket.on('msg', function (data) {
@@ -141,20 +141,18 @@ io.sockets.on('connection', function (socket) {
         }
         socket.emit('notice', {timestamp: time, msg: 'Rooms: ' + escapeHTML(roomlist.join(','))});
       } else if (data['msg'].indexOf('/join') === 0) {
-        socket.get('username', function (err, username) {
-          console.log('join ' + room);
-          // leave current channel
-          socket.leave(room);
-          socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + username + ' left this channel.'});
-          // join other channel
-          room = data['msg'].match(/\w+$/);
-          socket.join(room);
-          socket.emit('notice', {timestamp: time, msg: 'You switched to room ' + room});
-          socket.broadcast.to(room).emit('notice', {
-            timestamp: time,
-            msg: 'User ' + username + ' joined this channel',
-            username: ''
-          });
+        console.log('join ' + room);
+        // leave current channel
+        socket.leave(room);
+        socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + socket.username + ' left this channel.'});
+        // join other channel
+        room = data['msg'].match(/\w+$/);
+        socket.join(room);
+        socket.emit('notice', {timestamp: time, msg: 'You switched to room ' + room});
+        socket.broadcast.to(room).emit('notice', {
+          timestamp: time,
+          msg: 'User ' + socket.username + ' joined this channel',
+          username: ''
         });
         resendQueue(room, socket);
       } else if (data['msg'].indexOf('/help') === 0) {
@@ -173,17 +171,15 @@ io.sockets.on('connection', function (socket) {
         });
       }
     } else {
-      socket.get('username', function (err, username) {
-        var msg = {source: escapeHTML(username), msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
-        socket.broadcast.to(room).emit('msg', msg);
-        // add message to FIFO
-        if (!queue[room]) {
-          queue[room] = [];
-        }
-        queue[room].push(msg);
-        if (queue[room].length > 10) queue[room].shift();
-        socket.emit('msg', {source: 'You', msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time});
-      });
+      var msg = {source: escapeHTML(socket.username), msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
+      socket.broadcast.to(room).emit('msg', msg);
+      // add message to FIFO
+      if (!queue[room]) {
+        queue[room] = [];
+      }
+      queue[room].push(msg);
+      if (queue[room].length > 10) queue[room].shift();
+      socket.emit('msg', {source: 'You', msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time});
     }
   });
 });

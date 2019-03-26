@@ -4,15 +4,15 @@
   "version": "0.0.2",
   "license": "GPLv3",
   "dependencies": {
-    "socket.io": "0.9.8",
-    "vows": "0.8.1"
+    "socket.io": "2.2.0",
+    "vows": "0.8.2"
   },
   "engines": {
-    "node": "v0.12.x",
-    "npm": "2.3.x"
+    "node": "v11.x",
+    "npm": "6.5.x"
   },
   "scripts": {
-    "test":"vows test/* --spec",
+    "test": "vows test/* --spec",
     "start": "node app.js"
   }
 }
