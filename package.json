@@ -1,7 +1,8 @@
 {
   "name": "chocket",
   "repository": "https://github.com/MoriTanosuke/chocket",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "license": "GPLv3",
   "dependencies": {
     "socket.io": "0.9.8",
     "vows": "0.8.1"

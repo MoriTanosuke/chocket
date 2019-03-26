@@ -102,24 +102,35 @@ function scrollDown(id) {
 function isNotifyAvailable() {
   // checks if notification are enabled
   //TODO notifications are only for firefox right now
-  return window.webkitNotifications;
+  return "Notification" in window;
 }
 
 function isNotifyEnabled() {
   // 0 is PERMISSION_ALLOWED
-  return window.webkitNotifications && (window.webkitNotifications.checkPermission() == 0);
+  return Notification.permission === "granted";
+}
+
+function enableNotify() {
+  Notification.requestPermission().then(function(status) {
+    if(status === "granted") {
+      // hide button
+      $('#reqNotifyPerm').css('display', 'none');
+      notify('Notification allowed.', 'Thanks');
+    } else {
+      console.log('Notifications denied.');
+    }
+  });
 }
 
 function notify(title, msg) {
   if (isNotifyAvailable()) {
     if (isNotifyEnabled()) {
-      n = window.webkitNotifications.createNotification('/img/favicon.png', title, msg);
-      n.show();
+      n = new Notification(title, {body: msg, icon: '/img/favicon.png'});
       setTimeout(function(){
         n.cancel();
       }, 3000);
     } else {
-      window.webkitNotifications.requestPermission();
+      enableNotify();
     }
   } else {
     console.log("Notifications are not supported for this Browser/OS version yet.");
