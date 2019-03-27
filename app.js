@@ -2,7 +2,8 @@ var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
   , fs = require('fs')
   , path = require('path')
-  , emotes = require('./emoticons.js');
+  , emotes = require('./emoticons.js')
+  , utils = require('./utils.js');
 
 // we're using herokus PORT or 8888 locally
 var port = process.env.PORT || 8888;
@@ -60,36 +61,31 @@ function handler(req, res) {
 
 }
 
-function escapeHTML(string) {
-  string = string || "";
-  return replaceURLWithHTMLLinks(string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-}
-
-function replaceURLWithHTMLLinks(text) {
-  var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-  return text.replace(exp, "<a href='$1' target='_blank'>$1</a>");
-}
-
-function isDuplicate(username) {
-  for (i in users) {
-    if (users[i] === username) {
-      return true;
-    }
-  }
-  return false;
-}
-
 var queue = {};
 var users = [];
 
+const MESSAGE = 'msg';
+const NOTICE = 'notice';
+const FAILLOGIN = 'faillogin';
+const READY = 'ready';
+const ERROR = 'error';
+
+function emit(socket, cmd, data) {
+  socket.emit(cmd, data);
+}
+
+function emitRoom(socket, room, cmd, data) {
+  socket.broadcast.to(room).emit(cmd, data);
+}
+
 function resendQueue(room, socket) {
   if (queue[room] && queue[room].length > 0) {
-    socket.emit('notice', {
+    emit(socket, NOTICE, {
       timestamp: new Date(),
       msg: 'Sending you the last ' + queue[room].length + ' recent messages...'
     });
     for (i in queue[room]) {
-      socket.emit('msg', queue[room][i]);
+      emit(socket, MESSAGE, queue[room][i]);
     }
   }
 }
@@ -99,10 +95,10 @@ io.sockets.on('connection', function (socket) {
   socket.on('login', function (data) {
     if (data['username'] === '') {
       console.log('No username given');
-      socket.emit('faillogin', {timestamp: new Date(), users: users, reason: 'No username given'});
-    } else if (isDuplicate(data['username'])) {
+      emit(socket, FAILLOGIN, {timestamp: new Date(), users: users, reason: 'No username given'});
+    } else if (users.includes(data['username'])) {
       console.log('Username ' + data['username'] + ' already in use');
-      socket.emit('faillogin', {timestamp: new Date(), users: users, reason: 'Username already taken'});
+      emit(socket, FAILLOGIN, {timestamp: new Date(), users: users, reason: 'Username already taken'});
     } else {
       var time = new Date();
       console.log('User ' + data['username'] + ' joined');
@@ -110,16 +106,16 @@ io.sockets.on('connection', function (socket) {
 
       // store username
       socket.username = data['username'];
-      socket.broadcast.to(room).emit('notice', {
+      emitRoom(socket, room, NOTICE, {
           timestamp: time,
-          msg: 'User ' + escapeHTML(data['username']) + ' joined'
+          msg: 'User ' + utils.escapeHTML(data['username']) + ' joined'
         });
       users.push(data['username']);
 
-      socket.emit('ready', {
+      emit(socket, READY, {
         timestamp: time,
-        username: escapeHTML(data['username']),
-        users: escapeHTML(users.join(','))
+        username: utils.escapeHTML(data['username']),
+        users: utils.escapeHTML(users.join(','))
       });
       resendQueue(room, socket);
     }
@@ -132,41 +128,51 @@ io.sockets.on('connection', function (socket) {
     }
     var time = new Date();
     console.log('User ' + socket.username + ' left');
-    socket.broadcast.to(room).emit('msg', {timestamp: time, source: escapeHTML(socket.username), msg: 'User left'});
+    emitRoom(socket, room, MESSAGE, {timestamp: time, source: utils.escapeHTML(socket.username), msg: 'User left'});
   });
 
-  socket.on('msg', function (data) {
+  socket.on(MESSAGE, function (data) {
     var time = new Date();
     if (data['msg'][0] === '/') {
       // special commands
       if (data['msg'] === '/users') {
-        socket.emit('notice', {timestamp: time, msg: 'Users: ' + escapeHTML(users.join(','))});
+        emit(socket, NOTICE, {
+          timestamp: time,
+          msg: 'Users: ' + utils.escapeHTML(users.join(','))
+        });
       } else if (data['msg'] === '/rooms') {
         var roomlist = [];
-        for (var r in io.rooms) {
+        for (var r in io.sockets.adapter.rooms) {
           if (r) {
-            roomlist.push(r.substr(1));
+            roomlist.push(r);
           }
         }
-        socket.emit('notice', {timestamp: time, msg: 'Rooms: ' + escapeHTML(roomlist.join(','))});
+        emit(socket, NOTICE, {
+          timestamp: time,
+          msg: 'Rooms: ' + utils.escapeHTML(roomlist.join(','))
+        });
       } else if (data['msg'].indexOf('/join') === 0) {
         console.log('join ' + room);
         // leave current channel
         socket.leave(room);
-        socket.broadcast.to(room).emit('notice', {timestamp: time, msg: 'User ' + socket.username + ' left this channel.'});
+        emitRoom(socket, room, NOTICE, {timestamp: time, msg: 'User ' + socket.username + ' left this channel.'});
         // join other channel
         room = data['msg'].match(/\w+$/);
         socket.join(room);
-        socket.emit('notice', {timestamp: time, msg: 'You switched to room ' + room});
-        socket.broadcast.to(room).emit('notice', {
+        emit(socket, NOTICE, {
+          timestamp: time,
+          msg: 'You switched to room ' + room
+        });
+        emitRoom(socket, room, NOTICE, {
           timestamp: time,
           msg: 'User ' + socket.username + ' joined this channel',
           username: ''
         });
         resendQueue(room, socket);
       } else if (data['msg'].indexOf('/help') === 0) {
-        socket.emit('notice', {
-          timestamp: time, msg: 'Available commands:<ul>' +
+        emit(socket, NOTICE, {
+          timestamp: time,
+          msg: 'Available commands:<ul>' +
             '<li>/users - show list of users</li>' +
             '<li>/rooms - show list of rooms</li>' +
             '<li>/join &lt;room&gt; - switch to another chat room</li>' +
@@ -174,21 +180,21 @@ io.sockets.on('connection', function (socket) {
             '</ul>'
         });
       } else {
-        socket.emit('error', {
+        emit(socket, ERROR, {
           timestamp: time,
           msg: 'Unknown command. Type /help to see a list of available commands.'
         });
       }
     } else {
-      var msg = {source: escapeHTML(socket.username), msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time};
-      socket.broadcast.to(room).emit('msg', msg);
+      var msg = {source: utils.escapeHTML(socket.username), msg: emotes.replace(utils.escapeHTML(data['msg'])), timestamp: time};
+      emitRoom(socket, room, MESSAGE, msg);
       // add message to FIFO
       if (!queue[room]) {
         queue[room] = [];
       }
       queue[room].push(msg);
       if (queue[room].length > 10) queue[room].shift();
-      socket.emit('msg', {source: 'You', msg: emotes.replace(escapeHTML(data['msg'])), timestamp: time});
+      emit(socket, MESSAGE, {source: 'You', msg: emotes.replace(utils.escapeHTML(data['msg'])), timestamp: time});
     }
   });
 });
