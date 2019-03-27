@@ -106,7 +106,6 @@ function scrollDown(id) {
 
 function isNotifyAvailable() {
   // checks if notification are enabled
-  //TODO notifications are only for firefox right now
   return "Notification" in window;
 }
 
@@ -130,6 +129,7 @@ function enableNotify() {
 function notify(title, msg) {
   if (isNotifyAvailable()) {
     if (isNotifyEnabled()) {
+      //TODO replace HTML in notification body?
       const n = new Notification(title, {body: msg, icon: '/img/favicon.png'});
       setTimeout(() => {
         n.close();
