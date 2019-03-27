@@ -2,46 +2,51 @@ var socket = io.connect('/');
 var unread = 0;
 var username = 'John Doe';
 
+function append(id, text) {
+  document.getElementById(id).innerHTML += text;
+}
+
 // -------------------------------------------------------------------------
 // socket.io connections
 // -------------------------------------------------------------------------
 socket.on('ready', function (data) {
-  $('#chat').append('<p>You are logged in.</p>');
-  $('#chat').append('<p>Users: ' + data['users'] + '</p>');
+  append('chat', '<p>You are logged in.</p>');
+  append('chat', '<p>Users: ' + data['users'] + '</p>');
   scrollDown('chat');
   // hide username + connect, show disconnect
-  $('#username').css('display', 'none');
-  $('#connect').css('display', 'none');
+  document.getElementById('username').style.display = 'none';
+  document.getElementById('connect').style.display = 'none';
   // show message input
-  $('#msg').css('display', 'block');
-  $('#msg').focus();
+  document.getElementById('msg').style.display = 'block';
+  document.getElementById('msg').focus();
   if(isNotifyEnabled()) {
-    $('#reqNotifyPerm').css('display', 'none');
+    document.getElementById('reqNotifyPerm').style.display = 'none';
   }
 });
 
 socket.on('faillogin', function(data) {
-  $('#chat').append('<p class="error">' + data['reason'] + '</p>');
+  append('chat', '<p class="error">' + data['reason'] + '</p>');
   scrollDown('chat');
-  $('#username').css({'display':'block', 'float':'left'});
-  $('#connect').css('display', 'block');
-  $('#connect').removeAttr('disabled');
-  $('#msg').css('display', 'none');
+  document.getElementById('username').style.display ='block';
+  document.getElementById('username').style.float = 'left';
+  document.getElementById('connect').style.display = 'block';
+  document.getElementById('connect').removeAttribute('disabled');
+  document.getElementById('msg').style.display = 'none';
   if(isNotifyEnabled()) {
-    $('#reqNotifyPerm').css('display', 'block');
+    document.getElementById('reqNotifyPerm').style.display = 'block';
   }
 });
 
 socket.on('disconnect', function() {
-  $('#chat').append('<p>You are disconnected.</p>');
+  append('chat', '<p>You are disconnected.</p>');
   scrollDown('chat');
-  $('#username').css('display', 'block');
-  $('#connect').css('display', 'block');
-  $('#connect').removeAttr('disabled');
-  $('#msg').css('display', 'none');
+  document.getElementById('username').style.display = 'block';
+  document.getElementById('connect').style.display = 'block';
+  document.getElementById('connect').removeAttribute('disabled');
+  document.getElementById('msg').style.display = 'none';
   document.title = 'disconnected ' + document.title;
   if(isNotifyEnabled()) {
-    $('#reqNotifyPerm').css('display', 'block');
+    document.getElementById('reqNotifyPerm').style.display = 'block';
   }
 });
 
@@ -55,23 +60,23 @@ socket.on('msg', function(data) {
 
   var mention = "";
   var testUsername = username.toLowerCase();
-  var testMsg = $.trim(data['msg'].toLowerCase());
+  var testMsg = data['msg'].toLowerCase().trim();
   var pattern = new RegExp("(^|\\s)"+testUsername+"(\\s|$)");
   if(testMsg.match(pattern)){
-      mention = "mention";
-      notify(data['source'] + ' said:', data['msg']);
+    mention = "mention";
+    notify(data['source'] + ' said:', data['msg']);
   }
-  $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext '+mention+'">'  + data['msg'] + '</span></p>');
+  append('chat', '<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext '+mention+'">'  + data['msg'] + '</span></p>');
   scrollDown('chat');
 });
 
 socket.on('notice', function(data) {
-  $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
+  append('chat', '<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="notice">' + data['msg'] + '</span></p>');
   scrollDown('chat');
 });
 
 socket.on('msgerr', function(data) {
-  $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="error">' + data['msg'] + '</span></p>');
+  append('chat', '<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="error">' + data['msg'] + '</span></p>');
   scrollDown('chat');
 });
 
@@ -79,10 +84,11 @@ socket.on('msgerr', function(data) {
 // functions
 // -------------------------------------------------------------------------
 function login() {
-  username = $('#username').val();
-  $('#connect').attr('disabled', 'disabled');
+  username = document.getElementById('username').value;
+  document.getElementById('connect').attributes['disabled'] = 'disabled';
   socket.emit('login', {username: username});
 }
+
 function timestamp(t) {
   var hours = t.getHours();
   var minutes = t.getMinutes().toString();
@@ -93,9 +99,9 @@ function timestamp(t) {
 }
 
 function resizeWindow(){
-  var totalHeight = $(window).innerHeight();
-  var msgHeight = $("#controls").innerHeight();
-  $("#chat").height(totalHeight - (msgHeight + 25));
+  var totalHeight = window.innerHeight;
+  var msgHeight = document.getElementById('controls').clientHeight;
+  document.getElementById('chat').style.height = totalHeight - (msgHeight + 25) + 'px';
   scrollDown('chat');
 };
 
@@ -118,7 +124,7 @@ function enableNotify() {
   Notification.requestPermission().then(function(status) {
     if(status === "granted") {
       // hide button
-      $('#reqNotifyPerm').css('display', 'none');
+      document.getElementById('reqNotifyPerm').style.display = 'none';
       notify('Notification allowed.', 'Thanks');
     } else {
       console.log('Notifications denied.');
@@ -142,44 +148,27 @@ function notify(title, msg) {
   }
 }
 
-// -------------------------------------------------------------------------
-// jquery
-// -------------------------------------------------------------------------
-// bind jquery event handlers
-$(document).ready(function() {
-  $('#msg').keyup(function(event) {
-      if(event.keyCode == 13 && event.target.value != '') {
-	socket.emit('msg', {msg: event.target.value});
-	event.target.value = '';
-      }
-  });
+window.onload = function() {
+  if(isNotifyEnabled()) {
+    document.getElementById('reqNotifyPerm').style.display = 'none';
+  }
+  document.getElementById('msg').onkeyup = function(event) {
+    if(event.keyCode == 13 && event.target.value != '') {
+     socket.emit('msg', {msg: event.target.value});
+     event.target.value = '';
+   }
+  };
 
-  $("#username").keyup(function(event){
-      if(event.keyCode == 13 && event.target.value != '') {
-	      login();
-      }
-  });
-
-  $("#connect").click(function(event){
+  document.getElementById('username').onkeyup = function(event){
+    if(event.keyCode == 13 && event.target.value != '') {
       login();
-  });
+    }
+  };
 
-  $('#chat').bind('mousewheel', function(e) {
-      var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
-      $(this).scrollTop(scrollTop);
-  });
+  document.getElementById("connect").onclick = function(event){
+    login();
+  };
 
-  $(window).bind("resize",resizeWindow);
+  window.onresize = resizeWindow;
   setTimeout(resizeWindow,100);
-
-  // webkit
-  $('#chat').bind('mousewheel', function(e) {
-    var scrollTop = $(this).scrollTop() - e.originalEvent.wheelDelta;
-    $(this).scrollTop(scrollTop);
-  });
-
-  $('#chat').bind('DOMMouseScroll', function(e) {
-    var scrollTop = $(this).scrollTop() - e.originalEvent.detail;
-    $(this).scrollTop(scrollTop);
-  });
-});
+};

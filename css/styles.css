@@ -1,7 +1,7 @@
 body {
   background: black;
   color: white;
-  font-family: DejaVu Sans Mono, fixed;
+  font-family: DejaVu Sans Mono, Lucida Console, monospace, fixed;
   margin: 0;
   padding: 0;
 }

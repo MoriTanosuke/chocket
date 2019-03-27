@@ -3,10 +3,8 @@
 <head>
 <title>Chat</title>
 <link rel="shortcut icon" href="/img/favicon.png" />
-<link href='http://fonts.googleapis.com/css?family=Capriola' rel='stylesheet' type='text/css'>
 <script src="/socket.io/socket.io.js"></script>
 <link rel="stylesheet" href="/css/styles.css"/>
-<script src="//code.jquery.com/jquery.min.js"></script>
 <script src="script.js"></script>
 </head>
 <body>
@@ -19,13 +17,6 @@
 <input type="text" id="msg" placeholder="Enter your message here" />
 </div>
 
-<script>
-$(document).ready(function(){
-  if(isNotifyEnabled()) {
-    $('#reqNotifyPerm').remove();
-  }
-});
-</script>
 </body>
 </html>
 
