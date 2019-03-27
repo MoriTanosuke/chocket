@@ -1,9 +1,9 @@
 var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
-  , fs = require('fs')
-  , path = require('path')
-  , emotes = require('./emoticons.js')
-  , utils = require('./utils.js');
+, io = require('socket.io').listen(app)
+, fs = require('fs')
+, path = require('path')
+, emotes = require('./emoticons.js')
+, utils = require('./utils.js');
 
 // we're using herokus PORT or 8888 locally
 var port = process.env.PORT || 8888;
@@ -22,43 +22,42 @@ function handler(req, res) {
   var extname = path.extname(filePath);
   var contentType = 'text/html;charset=utf-8';
   switch (extname) {
-      case '.js':
-          contentType = 'text/javascript';
-          break;
-      case '.css':
-          contentType = 'text/css';
-          break;
-      case '.json':
-          contentType = 'application/json';
-          break;
-      case '.png':
-          contentType = 'image/png';
-          break;
-      case '.jpg':
-          contentType = 'image/jpg';
-          break;
+    case '.js':
+    contentType = 'text/javascript';
+    break;
+    case '.css':
+    contentType = 'text/css';
+    break;
+    case '.json':
+    contentType = 'application/json';
+    break;
+    case '.png':
+    contentType = 'image/png';
+    break;
+    case '.jpg':
+    contentType = 'image/jpg';
+    break;
   }
 
   fs.readFile(filePath, function(error, content) {
-        if (error) {
-            if(error.code == 'ENOENT'){
-                fs.readFile('./404.html', function(error, content) {
-                    res.writeHead(404, { 'Content-Type': contentType });
-                    res.end(content, 'utf-8');
-                });
-            }
-            else {
-                res.writeHead(500);
-                res.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
-                res.end();
-            }
-        }
-        else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
-
+    if (error) {
+      if(error.code == 'ENOENT'){
+        fs.readFile('./404.html', function(error, content) {
+          res.writeHead(404, { 'Content-Type': contentType });
+          res.end(content, 'utf-8');
+        });
+      }
+      else {
+        res.writeHead(500);
+        res.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+        res.end();
+      }
+    }
+    else {
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(content, 'utf-8');
+    }
+  });
 }
 
 var queue = {};
@@ -68,7 +67,7 @@ const MESSAGE = 'msg';
 const NOTICE = 'notice';
 const FAILLOGIN = 'faillogin';
 const READY = 'ready';
-const ERROR = 'error';
+const ERROR = 'msgerr';
 
 function emit(socket, cmd, data) {
   socket.emit(cmd, data);
@@ -107,9 +106,9 @@ io.sockets.on('connection', function (socket) {
       // store username
       socket.username = data['username'];
       emitRoom(socket, room, NOTICE, {
-          timestamp: time,
-          msg: 'User ' + utils.escapeHTML(data['username']) + ' joined'
-        });
+        timestamp: time,
+        msg: 'User ' + utils.escapeHTML(data['username']) + ' joined'
+      });
       users.push(data['username']);
 
       emit(socket, READY, {
@@ -120,6 +119,7 @@ io.sockets.on('connection', function (socket) {
       resendQueue(room, socket);
     }
   });
+
   socket.on('disconnect', function () {
     for (i in users) {
       if (users[i] === socket.username) {
@@ -128,7 +128,11 @@ io.sockets.on('connection', function (socket) {
     }
     var time = new Date();
     console.log('User ' + socket.username + ' left');
-    emitRoom(socket, room, MESSAGE, {timestamp: time, source: utils.escapeHTML(socket.username), msg: 'User left'});
+    emitRoom(socket, room, MESSAGE, {
+      timestamp: time,
+      source: utils.escapeHTML(socket.username),
+      msg: 'User left'
+    });
   });
 
   socket.on(MESSAGE, function (data) {
@@ -155,7 +159,10 @@ io.sockets.on('connection', function (socket) {
         console.log('join ' + room);
         // leave current channel
         socket.leave(room);
-        emitRoom(socket, room, NOTICE, {timestamp: time, msg: 'User ' + socket.username + ' left this channel.'});
+        emitRoom(socket, room, NOTICE, {
+          timestamp: time,
+          msg: 'User ' + socket.username + ' left this channel.'
+        });
         // join other channel
         room = data['msg'].match(/\w+$/);
         socket.join(room);
@@ -173,11 +180,11 @@ io.sockets.on('connection', function (socket) {
         emit(socket, NOTICE, {
           timestamp: time,
           msg: 'Available commands:<ul>' +
-            '<li>/users - show list of users</li>' +
-            '<li>/rooms - show list of rooms</li>' +
-            '<li>/join &lt;room&gt; - switch to another chat room</li>' +
-            '<li>/help - show this help</li>' +
-            '</ul>'
+          '<li>/users - show list of users</li>' +
+          '<li>/rooms - show list of rooms</li>' +
+          '<li>/join &lt;room&gt; - switch to another chat room</li>' +
+          '<li>/help - show this help</li>' +
+          '</ul>'
         });
       } else {
         emit(socket, ERROR, {
@@ -186,7 +193,11 @@ io.sockets.on('connection', function (socket) {
         });
       }
     } else {
-      var msg = {source: utils.escapeHTML(socket.username), msg: emotes.replace(utils.escapeHTML(data['msg'])), timestamp: time};
+      var msg = {
+        source: utils.escapeHTML(socket.username),
+        msg: emotes.replace(utils.escapeHTML(data['msg'])),
+        timestamp: time
+      };
       emitRoom(socket, room, MESSAGE, msg);
       // add message to FIFO
       if (!queue[room]) {
@@ -194,7 +205,11 @@ io.sockets.on('connection', function (socket) {
       }
       queue[room].push(msg);
       if (queue[room].length > 10) queue[room].shift();
-      emit(socket, MESSAGE, {source: 'You', msg: emotes.replace(utils.escapeHTML(data['msg'])), timestamp: time});
+      emit(socket, MESSAGE, {
+        source: 'You',
+        msg: emotes.replace(utils.escapeHTML(data['msg'])),
+        timestamp: time
+      });
     }
   });
 });

@@ -70,7 +70,7 @@ socket.on('notice', function(data) {
   scrollDown('chat');
 });
 
-socket.on('error', function(data) {
+socket.on('msgerr', function(data) {
   $('#chat').append('<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="error">' + data['msg'] + '</span></p>');
   scrollDown('chat');
 });
