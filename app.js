@@ -1,6 +1,7 @@
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
   , fs = require('fs')
+  , path = require('path')
   , emotes = require('./emoticons.js');
 
 // we're using herokus PORT or 8888 locally
@@ -11,44 +12,52 @@ console.log("Application running on port " + port);
 // create FIFO for last sent messages
 
 function handler(req, res) {
-  // check if we should serve an image
   var filePath = '.' + req.url;
-  if (filePath.indexOf('./img/') == 0) {
-    fs.readFile(filePath, function (err, data) {
-      if (err) {
-        console.log("Something went wrong while serving an image from " + filePath);
-        res.writeHead(200); // we're silently supressing output
-        return res.end();
-      }
-      res.writeHead(200);
-      return res.end(data);
-    });
-  } else if (filePath.indexOf('.js') > 0 && filePath.indexOf('.js') == (filePath.length - 3)) {
-    //console.log("Loading file " + filePath);
-    fs.readFile(filePath,
-      function (err, data) {
-        if (err) {
-          res.writeHead(500);
-          return res.end('Error loading ' + filePath);
-        }
-        res.writeHead(200, {
-          'Content-Type': 'application/x-javascript'
-        });
-        res.end(data);
-      });
-  } else {
-    fs.readFile(__dirname + '/index.html',
-      function (err, data) {
-        if (err) {
-          res.writeHead(500);
-          return res.end('Error loading index.html');
-        }
-        res.writeHead(200, {
-          'Content-Type': 'text/html; charset=utf-8'
-        });
-        res.end(data);
-      });
+  if (filePath == './') {
+    filePath = './index.html';
   }
+
+  // get file extension
+  var extname = path.extname(filePath);
+  var contentType = 'text/html;charset=utf-8';
+  switch (extname) {
+      case '.js':
+          contentType = 'text/javascript';
+          break;
+      case '.css':
+          contentType = 'text/css';
+          break;
+      case '.json':
+          contentType = 'application/json';
+          break;
+      case '.png':
+          contentType = 'image/png';
+          break;
+      case '.jpg':
+          contentType = 'image/jpg';
+          break;
+  }
+
+  fs.readFile(filePath, function(error, content) {
+        if (error) {
+            if(error.code == 'ENOENT'){
+                fs.readFile('./404.html', function(error, content) {
+                    res.writeHead(404, { 'Content-Type': contentType });
+                    res.end(content, 'utf-8');
+                });
+            }
+            else {
+                res.writeHead(500);
+                res.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+                res.end();
+            }
+        }
+        else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
+        }
+    });
+
 }
 
 function escapeHTML(string) {

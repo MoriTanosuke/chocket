@@ -1,31 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Chat</title>
+<title>404 Not Found</title>
 <link rel="shortcut icon" href="/img/favicon.png" />
 <link href='http://fonts.googleapis.com/css?family=Capriola' rel='stylesheet' type='text/css'>
 <script src="/socket.io/socket.io.js"></script>
 <link rel="stylesheet" href="/css/styles.css"/>
 <script src="//code.jquery.com/jquery.min.js"></script>
-<script src="script.js"></script>
 </head>
 <body>
 <a href="https://github.com/MoriTanosuke/chocket" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
-<div id="chat"></div>
-<div id="controls">
-<input type="text" id="username" value="" placeholder="Enter your name" />
-<button id="connect">Connect</button>
-<button id="reqNotifyPerm" onclick="enableNotify();">Allow notifications</button>
-<input type="text" id="msg" placeholder="Enter your message here" />
+<div class="center">
+<p>Page not found.</p>
+<p><a href="/">Go back</a></p>
 </div>
-
-<script>
-$(document).ready(function(){
-  if(isNotifyEnabled()) {
-    $('#reqNotifyPerm').remove();
-  }
-});
-</script>
 </body>
 </html>
 
