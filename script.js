@@ -66,7 +66,11 @@ socket.on('msg', function(data) {
     mention = "mention";
     notify(data['source'] + ' said:', data['msg']);
   }
-  append('chat', '<p><span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span> <span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>: <span class="messagetext '+mention+'">'  + data['msg'] + '</span></p>');
+  append('chat', '<p>' +
+    '<span class="timestamp">' + timestamp(new Date(data['timestamp'])) + '</span>&nbsp;' +
+    '<span class="username' + (data['source'] === "You" ? " you" : "") + '">' + data['source'] + '</span>:&nbsp;' +
+    '<span class="messagetext '+mention+'">'  + replaceEmoticons(data['msg']) + '</span>' +
+    '</p>');
   scrollDown('chat');
 });
 

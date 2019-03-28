@@ -2,7 +2,6 @@ var app = require('http').createServer(handler)
 , io = require('socket.io').listen(app)
 , fs = require('fs')
 , path = require('path')
-, emotes = require('./emoticons.js')
 , utils = require('./utils.js');
 
 // we're using herokus PORT or 8888 locally
@@ -156,7 +155,7 @@ io.sockets.on('connection', function (socket) {
           msg: 'Rooms: ' + utils.escapeHTML(roomlist.join(','))
         });
       } else if (data['msg'].indexOf('/join') === 0) {
-        console.log('join ' + room);
+        console.log('leave ' + room);
         // leave current channel
         socket.leave(room);
         emitRoom(socket, room, NOTICE, {
@@ -165,6 +164,7 @@ io.sockets.on('connection', function (socket) {
         });
         // join other channel
         room = data['msg'].match(/\w+$/);
+        console.log('join ' + room);
         socket.join(room);
         emit(socket, NOTICE, {
           timestamp: time,
@@ -195,7 +195,7 @@ io.sockets.on('connection', function (socket) {
     } else {
       var msg = {
         source: utils.escapeHTML(socket.username),
-        msg: emotes.replace(utils.escapeHTML(data['msg'])),
+        msg: utils.escapeHTML(data['msg']),
         timestamp: time
       };
       emitRoom(socket, room, MESSAGE, msg);
@@ -207,7 +207,7 @@ io.sockets.on('connection', function (socket) {
       if (queue[room].length > 10) queue[room].shift();
       emit(socket, MESSAGE, {
         source: 'You',
-        msg: emotes.replace(utils.escapeHTML(data['msg'])),
+        msg: utils.escapeHTML(data['msg']),
         timestamp: time
       });
     }

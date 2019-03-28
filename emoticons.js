@@ -33,9 +33,13 @@ var emoji = {
   }
 };
 
-exports.replace = function(string) {
+function replaceEmoticons(string) {
   for(var key in emoji) {
     string = string.replace(emoji[key].pattern, emoji[key].html);
   }
   return string;
 };
+
+(function(exports){
+  exports.replace = replaceEmoticons;
+})(typeof exports === 'undefined'? this['mymodule']={}: exports);
