@@ -1,34 +1,34 @@
 var emoji = {
   smile: {
-    html: '<img src="/img/smile.png" alt=":-)" />',
+    html: '😃',
     pattern: /:-?\)/gm,
   },
   sad: {
-    html: '<img src="/img/sad.png" alt=":-(" />',
+    html: '🙁',
     pattern: /:-?\(/gm,
   },
   wink: {
-    html: '<img src="/img/wink.png" alt=";-)" />',
+    html: '😉',
     pattern: /;-?\)/gm,
   },
   plain: {
-    html: '<img src="/img/wtf.png" alt=":-|" />',
+    html: '😐',
     pattern: /:-?\|/gm,
   },
   grin: {
-    html: '<img src="/img/grin.png" alt=":-D" />',
+    html: '😀',
     pattern: /:-?D/gm,
   },
   surprise: {
-    html: '<img src="/img/surprised.png" alt=":-O" />',
+    html: '😯',
     pattern: /:-?O/gm,
   },
   tongue: {
-    html: '<img src="/img/tongue.png" alt=":-P" />',
+    html: '😛',
     pattern: /:-?P/gm,
   },
   dazed: {
-    html: '<img src="/img/dazed.png" alt="%-)" />',
+    html: '😲',
     pattern: /%-?\)/gm,
   }
 };
