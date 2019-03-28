@@ -11,6 +11,8 @@ RUN npm config set proxy $http_proxy && \
     npm config set https-proxy $https_proxy && \
     npm install
 
+RUN npm test
+
 ENV PORT=8888
 EXPOSE 8888
-CMD ["node", "app.js"]
+CMD ["npm", "start"]
