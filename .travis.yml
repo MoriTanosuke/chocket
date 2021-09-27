@@ -1,8 +1,0 @@
-language: node_js
-node_js:
-- '11'
-deploy:
-  provider: heroku
-  app: glacial-retreat-2445
-  api_key:
-    secure: g3NZg65BmlN1Ax2Wvxst0xSFif0b8BVZYPpXI+1GUrcA18wffv0dMuby+bITmednc+HbQZ+z2dImbPugltgm9pytZB+OCvWcsuiwyRm4rAhXBO12VhW/zAagSivHgy+JDqvxu2eVgSgbfJwqbfBzzcK/W2J671bC2rZEE8oW5Ro=
