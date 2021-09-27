@@ -11,6 +11,7 @@ Build Status
 ------------
 
 [![Build Status](https://secure.travis-ci.org/MoriTanosuke/chocket.png?branch=master)](http://travis-ci.org/MoriTanosuke/chocket)
+[![CI to Docker Hub](https://github.com/MoriTanosuke/chocket/actions/workflows/main.yml/badge.svg)](https://github.com/MoriTanosuke/chocket/actions/workflows/main.yml)
 
 Run on docker
 =============
