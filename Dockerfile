@@ -12,4 +12,5 @@ RUN npm install && \
 
 ENV PORT=8888
 EXPOSE 8888
+USER node
 CMD ["npm", "start"]
