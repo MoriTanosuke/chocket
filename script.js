@@ -1,6 +1,6 @@
-var socket = io.connect('/');
-var unread = 0;
-var username = 'John Doe';
+const socket = io.connect('/');
+let unread = 0;
+let username = 'John Doe';
 
 function append(id, text) {
   document.getElementById(id).innerHTML += text;
@@ -58,10 +58,10 @@ socket.on('msg', function(data) {
   }
   document.title = '(' + unread + ') chat';
 
-  var mention = "";
-  var testUsername = username.toLowerCase();
-  var testMsg = data['msg'].toLowerCase().trim();
-  var pattern = new RegExp("(^|\\s)"+testUsername+"(\\s|$)");
+  let mention = "";
+  const testUsername = username.toLowerCase();
+  const testMsg = data['msg'].toLowerCase().trim();
+  const pattern = new RegExp("(^|\\s)"+testUsername+"(\\s|$)");
   if(testMsg.match(pattern)){
     mention = "mention";
     notify(data['source'] + ' said:', data['msg']);
@@ -94,8 +94,8 @@ function login() {
 }
 
 function timestamp(t) {
-  var hours = t.getHours();
-  var minutes = t.getMinutes().toString();
+  const hours = t.getHours();
+  let minutes = t.getMinutes().toString();
   if (minutes.length === 1) {
     minutes = "0" + minutes;
   }
@@ -103,14 +103,14 @@ function timestamp(t) {
 }
 
 function resizeWindow(){
-  var totalHeight = window.innerHeight;
-  var msgHeight = document.getElementById('controls').clientHeight;
+  const totalHeight = window.innerHeight;
+  const msgHeight = document.getElementById('controls').clientHeight;
   document.getElementById('chat').style.height = totalHeight - (msgHeight + 25) + 'px';
   scrollDown('chat');
-};
+}
 
 function scrollDown(id) {
-  var objDiv = document.getElementById(id);
+  const objDiv = document.getElementById(id);
   objDiv.scrollTop = objDiv.scrollHeight;
 }
 
@@ -157,19 +157,19 @@ window.onload = function() {
     document.getElementById('reqNotifyPerm').style.display = 'none';
   }
   document.getElementById('msg').onkeyup = function(event) {
-    if(event.keyCode == 13 && event.target.value != '') {
+    if(event.code === 'Enter' && event.target.value !== '') {
      socket.emit('msg', {msg: event.target.value});
      event.target.value = '';
    }
   };
 
   document.getElementById('username').onkeyup = function(event){
-    if(event.keyCode == 13 && event.target.value != '') {
+    if(event.code === 'Enter' && event.target.value !== '') {
       login();
     }
   };
 
-  document.getElementById("connect").onclick = function(event){
+  document.getElementById("connect").onclick = function(){
     login();
   };
 

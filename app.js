@@ -12,8 +12,8 @@ console.log("Application running on port " + port);
 // create FIFO for last sent messages
 
 function handler(req, res) {
-  var filePath = '.' + req.url;
-  if (filePath == './') {
+  let filePath = '.' + req.url;
+  if (filePath === './') {
     filePath = './index.html';
   }
 
@@ -40,7 +40,7 @@ function handler(req, res) {
 
   fs.readFile(filePath, function(error, content) {
     if (error) {
-      if(error.code == 'ENOENT'){
+      if(error.code === 'ENOENT'){
         fs.readFile('./404.html', function(error, content) {
           res.writeHead(404, { 'Content-Type': contentType });
           res.end(content, 'utf-8');
@@ -82,9 +82,65 @@ function resendQueue(room, socket) {
       timestamp: new Date(),
       msg: 'Sending you the last ' + queue[room].length + ' recent messages...'
     });
-    for (i in queue[room]) {
+    for (let i in queue[room]) {
       emit(socket, MESSAGE, queue[room][i]);
     }
+  }
+}
+
+function handleCommand(line, socket, time, room) {
+  // special commands
+  if (line === '/users') {
+    emit(socket, NOTICE, {
+      timestamp: time,
+      msg: 'Users: ' + utils.escapeHTML(users.join(','))
+    });
+  } else if (line === '/rooms') {
+    const roomlist = [room];
+    for (let r in Object.entries(io.sockets.adapter.rooms)) {
+      if (r) {
+        roomlist.push(r);
+      }
+    }
+    emit(socket, NOTICE, {
+      timestamp: time,
+      msg: 'Rooms: ' + utils.escapeHTML(roomlist.join(','))
+    });
+  } else if (line.indexOf('/join') === 0) {
+    // leave current channel
+    socket.leave(room);
+    emitRoom(socket, room, NOTICE, {
+      timestamp: time,
+      msg: 'User ' + socket.username + ' left this channel.'
+    });
+    // join other channel
+    room = line.match(/\w+$/);
+    socket.join(room);
+    emit(socket, NOTICE, {
+      timestamp: time,
+      msg: 'You switched to room ' + room
+    });
+    emitRoom(socket, room, NOTICE, {
+      timestamp: time,
+      msg: 'User ' + socket.username + ' joined this channel',
+      username: ''
+    });
+    resendQueue(room, socket);
+  } else if (line.indexOf('/help') === 0) {
+    emit(socket, NOTICE, {
+      timestamp: time,
+      msg: 'Available commands:<ul>' +
+        '<li>/users - show list of users</li>' +
+        '<li>/rooms - show list of rooms</li>' +
+        '<li>/join &lt;room&gt; - switch to another chat room</li>' +
+        '<li>/help - show this help</li>' +
+        '</ul>'
+    });
+  } else {
+    emit(socket, ERROR, {
+      timestamp: time,
+      msg: 'Unknown command. Type /help to see a list of available commands.'
+    });
   }
 }
 
@@ -92,14 +148,11 @@ io.sockets.on('connection', function (socket) {
   var room = 'Lobby';
   socket.on('login', function (data) {
     if (data['username'] === '') {
-      console.log('No username given');
       emit(socket, FAILLOGIN, {timestamp: new Date(), users: users, reason: 'No username given'});
     } else if (users.includes(data['username'])) {
-      console.log('Username ' + data['username'] + ' already in use');
       emit(socket, FAILLOGIN, {timestamp: new Date(), users: users, reason: 'Username already taken'});
     } else {
       var time = new Date();
-      console.log('User ' + data['username'] + ' joined');
       socket.join(room);
 
       // store username
@@ -120,13 +173,12 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('disconnect', function () {
-    for (i in users) {
+    for (let i in users) {
       if (users[i] === socket.username) {
         users.splice(i, 1);
       }
     }
-    var time = new Date();
-    console.log('User ' + socket.username + ' left');
+    const time = new Date();
     emitRoom(socket, room, MESSAGE, {
       timestamp: time,
       source: utils.escapeHTML(socket.username),
@@ -135,63 +187,10 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on(MESSAGE, function (data) {
-    var time = new Date();
+    const time = new Date();
+
     if (data['msg'][0] === '/') {
-      // special commands
-      if (data['msg'] === '/users') {
-        emit(socket, NOTICE, {
-          timestamp: time,
-          msg: 'Users: ' + utils.escapeHTML(users.join(','))
-        });
-      } else if (data['msg'] === '/rooms') {
-        var roomlist = [];
-        for (var r in io.sockets.adapter.rooms) {
-          if (r) {
-            roomlist.push(r);
-          }
-        }
-        emit(socket, NOTICE, {
-          timestamp: time,
-          msg: 'Rooms: ' + utils.escapeHTML(roomlist.join(','))
-        });
-      } else if (data['msg'].indexOf('/join') === 0) {
-        console.log('leave ' + room);
-        // leave current channel
-        socket.leave(room);
-        emitRoom(socket, room, NOTICE, {
-          timestamp: time,
-          msg: 'User ' + socket.username + ' left this channel.'
-        });
-        // join other channel
-        room = data['msg'].match(/\w+$/);
-        console.log('join ' + room);
-        socket.join(room);
-        emit(socket, NOTICE, {
-          timestamp: time,
-          msg: 'You switched to room ' + room
-        });
-        emitRoom(socket, room, NOTICE, {
-          timestamp: time,
-          msg: 'User ' + socket.username + ' joined this channel',
-          username: ''
-        });
-        resendQueue(room, socket);
-      } else if (data['msg'].indexOf('/help') === 0) {
-        emit(socket, NOTICE, {
-          timestamp: time,
-          msg: 'Available commands:<ul>' +
-          '<li>/users - show list of users</li>' +
-          '<li>/rooms - show list of rooms</li>' +
-          '<li>/join &lt;room&gt; - switch to another chat room</li>' +
-          '<li>/help - show this help</li>' +
-          '</ul>'
-        });
-      } else {
-        emit(socket, ERROR, {
-          timestamp: time,
-          msg: 'Unknown command. Type /help to see a list of available commands.'
-        });
-      }
+      handleCommand(data['msg'], socket, time, room)
     } else {
       var msg = {
         source: utils.escapeHTML(socket.username),
